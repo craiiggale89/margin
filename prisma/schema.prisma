@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./margin.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("AGENT") // EDITOR or AGENT
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  agents    Agent[]
+}
+
+model Agent {
+  id          String   @id @default(cuid())
+  name        String
+  focus       String?
+  pitchLimit  Int      @default(3)
+  constraints String?
+  active      Boolean  @default(true)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  pitches     Pitch[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Pitch {
+  id            String   @id @default(cuid())
+  title         String
+  standfirst    String
+  angle         String
+  whyNow        String?
+  contextLabel  String?
+  estimatedTime Int
+  status        String   @default("SUBMITTED") // SUBMITTED, IN_REVIEW, REVISION_REQUESTED, APPROVED, REJECTED
+  editorNotes   String?
+  agentId       String
+  agent         Agent    @relation(fields: [agentId], references: [id])
+  draft         Draft?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Draft {
+  id          String   @id @default(cuid())
+  content     String
+  editorNotes String?
+  status      String   @default("DRAFT") // DRAFT, SUBMITTED, IN_REVIEW, REVISION_REQUESTED, APPROVED
+  pitchId     String   @unique
+  pitch       Pitch    @relation(fields: [pitchId], references: [id])
+  article     Article?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Article {
+  id            String    @id @default(cuid())
+  slug          String    @unique
+  title         String
+  standfirst    String
+  content       String
+  contextLabel  String?
+  byline        String    @default("By Margin")
+  readingTime   Int
+  imageUrl      String?
+  featured      Boolean   @default(false)
+  sportFilter   String?   // Cycling, Running, Multi
+  draftId       String    @unique
+  draft         Draft     @relation(fields: [draftId], references: [id])
+  publishedAt   DateTime?
+  scheduledFor  DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  // Related articles (many-to-many self-relation)
+  relatedTo     ArticleRelation[] @relation("ArticleFrom")
+  relatedFrom   ArticleRelation[] @relation("ArticleTo")
+}
+
+model ArticleRelation {
+  id        String  @id @default(cuid())
+  fromId    String
+  toId      String
+  from      Article @relation("ArticleFrom", fields: [fromId], references: [id])
+  to        Article @relation("ArticleTo", fields: [toId], references: [id])
+  
+  @@unique([fromId, toId])
+}
