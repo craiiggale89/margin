@@ -1,4 +1,5 @@
 import prisma from '@/lib/db'
+import { serializePrisma } from '@/lib/utils'
 import AdminDashboardContent from '@/components/admin/AdminDashboardContent'
 
 export const dynamic = 'force-dynamic'
@@ -25,5 +26,6 @@ async function getDashboardStats() {
 
 export default async function AdminDashboard() {
   const stats = await getDashboardStats()
-  return <AdminDashboardContent stats={stats} />
+
+  return <AdminDashboardContent stats={serializePrisma(stats)} />
 }

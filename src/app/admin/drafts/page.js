@@ -1,4 +1,5 @@
 import prisma from '@/lib/db'
+import { serializePrisma } from '@/lib/utils'
 import AdminDraftsContent from '@/components/admin/AdminDraftsContent'
 
 async function getDrafts() {
@@ -24,9 +25,10 @@ async function getDrafts() {
 
 export default async function DraftsPage() {
     const drafts = await getDrafts()
+    const sDrafts = serializePrisma(drafts)
 
-    const submittedDrafts = drafts.filter(d => d.status === 'SUBMITTED' || d.status === 'IN_REVIEW')
-    const otherDrafts = drafts.filter(d => d.status !== 'SUBMITTED' && d.status !== 'IN_REVIEW')
+    const submittedDrafts = sDrafts.filter(d => d.status === 'SUBMITTED' || d.status === 'IN_REVIEW')
+    const otherDrafts = sDrafts.filter(d => d.status !== 'SUBMITTED' && d.status !== 'IN_REVIEW')
 
-    return <AdminDraftsContent drafts={drafts} submittedDrafts={submittedDrafts} otherDrafts={otherDrafts} />
+    return <AdminDraftsContent drafts={sDrafts} submittedDrafts={submittedDrafts} otherDrafts={otherDrafts} />
 }
