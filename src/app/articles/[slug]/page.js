@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import prisma from '@/lib/db'
+import { serializePrisma } from '@/lib/utils'
 import ArticleDetail from '@/components/articles/ArticleDetail'
 
 export const dynamic = 'force-dynamic'
@@ -57,5 +58,5 @@ export default async function ArticlePage({ params }) {
 
     const relatedArticles = await getRelatedArticles(article.id)
 
-    return <ArticleDetail article={article} relatedArticles={relatedArticles} />
+    return <ArticleDetail article={serializePrisma(article)} relatedArticles={serializePrisma(relatedArticles)} />
 }

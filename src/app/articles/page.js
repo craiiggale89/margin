@@ -1,4 +1,5 @@
 import prisma from '@/lib/db'
+import { serializePrisma } from '@/lib/utils'
 import ArticlesContent from '@/components/articles/ArticlesContent'
 
 export const dynamic = 'force-dynamic'
@@ -32,5 +33,5 @@ export default async function ArticlesPage({ searchParams }) {
     const filter = searchParams?.filter || 'all'
     const articles = await getArticles(filter)
 
-    return <ArticlesContent articles={articles} filter={filter} />
+    return <ArticlesContent articles={serializePrisma(articles)} filter={filter} />
 }
