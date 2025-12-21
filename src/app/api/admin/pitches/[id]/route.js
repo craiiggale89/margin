@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireEditor } from '@/lib/auth'
+import { generateArticle } from '@/lib/ai'
 
 export async function PATCH(request, { params }) {
     try {
@@ -34,10 +35,18 @@ export async function PATCH(request, { params }) {
 
         // If approved, create a draft automatically
         if (action === 'approve') {
+            // Fetch Agent for AI Generation
+            const agent = await prisma.agent.findUnique({
+                where: { id: pitch.agentId }
+            })
+
+            // Generate full article
+            const aiContent = agent ? await generateArticle({ pitch, agent }) : ''
+
             await prisma.draft.create({
                 data: {
                     pitchId: pitch.id,
-                    content: '',
+                    content: aiContent,
                     status: 'DRAFT',
                 },
             })

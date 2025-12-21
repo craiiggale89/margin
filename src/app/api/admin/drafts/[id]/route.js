@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireEditor } from '@/lib/auth'
+import { refineArticle } from '@/lib/ai'
 
 export async function PATCH(request, { params }) {
     try {
@@ -44,6 +45,32 @@ export async function PATCH(request, { params }) {
                         data: {
                             status: 'REVISION_REQUESTED',
                             editorNotes: notes || null,
+                        },
+                    })
+                    break
+
+                case 'refine':
+                    // Fetch Agent
+                    const agent = await prisma.agent.findUnique({
+                        where: { id: draft.pitch.agentId }
+                    })
+
+                    if (!agent) throw new Error('Agent not found')
+
+                    // Refine Content
+                    const refinedContent = await refineArticle({
+                        currentContent: draft.content,
+                        feedback: notes, // passing feedback in 'notes' field
+                        agent
+                    })
+
+                    // Update Draft
+                    await prisma.draft.update({
+                        where: { id: draftId },
+                        data: {
+                            content: refinedContent,
+                            // We keep status as is, or maybe 'DRAFT'?
+                            // Let's assume editor is still working on it.
                         },
                     })
                     break

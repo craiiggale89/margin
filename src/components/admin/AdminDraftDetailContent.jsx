@@ -1,48 +1,96 @@
 'use client'
 
+import { useState } from 'react'
 import DraftEditor from '@/components/admin/DraftEditor'
 import DraftActions from '@/components/admin/DraftActions'
 
 export default function AdminDraftDetailContent({ draft }) {
-    return (
-        <div className="draft-detail-page">
-            <header className="draft-header">
-                <div className="draft-header-content">
-                    {draft.pitch.contextLabel && (
-                        <span className="context-label">{draft.pitch.contextLabel}</span>
-                    )}
-                    <h1 className="draft-title">{draft.pitch.title}</h1>
-                    <p className="draft-standfirst">{draft.pitch.standfirst}</p>
-                    <div className="metadata">
-                        <span>By {draft.pitch.agent.name}</span>
-                        <span className="metadata-separator"></span>
-                        <span>{draft.pitch.estimatedTime} min read</span>
-                    </div>
-                </div>
+  const [isRefining, setIsRefining] = useState(false)
+  const [refineFeedback, setRefineFeedback] = useState('')
 
-                <DraftActions
-                    draftId={draft.id}
-                    status={draft.status}
-                    hasArticle={!!draft.article}
-                />
-            </header>
+  const handleRefine = async () => {
+    setIsRefining(true)
+    try {
+      const res = await fetch(`/api/admin/drafts/${draft.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'refine',
+          notes: refineFeedback
+        }),
+      })
+      if (res.ok) {
+        setRefineFeedback('')
+        window.location.reload()
+      }
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setIsRefining(false)
+    }
+  }
+  return (
+    <div className="draft-detail-page">
+      <header className="draft-header">
+        <div className="draft-header-content">
+          {draft.pitch.contextLabel && (
+            <span className="context-label">{draft.pitch.contextLabel}</span>
+          )}
+          <h1 className="draft-title">{draft.pitch.title}</h1>
+          <p className="draft-standfirst">{draft.pitch.standfirst}</p>
+          <div className="metadata">
+            <span>By {draft.pitch.agent.name}</span>
+            <span className="metadata-separator"></span>
+            <span>{draft.pitch.estimatedTime} min read</span>
+          </div>
+        </div>
 
-            <div className="draft-content">
-                <DraftEditor
-                    draftId={draft.id}
-                    initialContent={draft.content}
-                    isReadOnly={draft.status === 'APPROVED'}
-                />
-            </div>
+        <DraftActions
+          draftId={draft.id}
+          status={draft.status}
+          hasArticle={!!draft.article}
+        />
+      </header>
 
-            {draft.editorNotes && (
-                <aside className="editor-notes">
-                    <h3 className="notes-title">Editor Notes</h3>
-                    <p>{draft.editorNotes}</p>
-                </aside>
-            )}
+      <div className="draft-content">
+        <DraftEditor
+          draftId={draft.id}
+          initialContent={draft.content}
+          isReadOnly={draft.status === 'APPROVED'}
+        />
+      </div>
 
-            <style jsx>{`
+      {!draft.article && (
+        <div className="refine-panel">
+          <h3 className="refine-title">✨ Refine with AI</h3>
+          <div className="refine-controls">
+            <input
+              type="text"
+              className="refine-input"
+              placeholder="e.g. 'Make the tone more serious', 'Expand on the second paragraph'..."
+              value={refineFeedback}
+              onChange={(e) => setRefineFeedback(e.target.value)}
+              disabled={isRefining}
+            />
+            <button
+              className="btn btn-secondary"
+              onClick={handleRefine}
+              disabled={isRefining || !refineFeedback}
+            >
+              {isRefining ? 'Refining...' : 'Refine Draft'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {draft.editorNotes && (
+        <aside className="editor-notes">
+          <h3 className="notes-title">Editor Notes</h3>
+          <p>{draft.editorNotes}</p>
+        </aside>
+      )}
+
+      <style jsx>{`
         .draft-detail-page {
           max-width: 800px;
         }
@@ -83,6 +131,36 @@ export default function AdminDraftDetailContent({ draft }) {
           border-radius: 6px;
           padding: var(--space-6);
         }
+
+        .refine-panel {
+            background: linear-gradient(to right, #fbfbfb, #f5f5f5);
+            border: 1px solid var(--color-border-subtle);
+            border-radius: 8px;
+            padding: var(--space-4) var(--space-6);
+            margin-bottom: var(--space-6);
+        }
+
+        .refine-title {
+            font-size: var(--text-sm);
+            font-weight: 600;
+            color: #6366f1;
+            margin-bottom: var(--space-3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .refine-controls {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        .refine-input {
+            flex: 1;
+            padding: var(--space-2) var(--space-3);
+            border: 1px solid var(--color-border);
+            border-radius: 4px;
+            font-size: var(--text-sm);
+        }
         
         .notes-title {
           font-family: var(--font-sans);
@@ -94,6 +172,6 @@ export default function AdminDraftDetailContent({ draft }) {
           margin-bottom: var(--space-3);
         }
       `}</style>
-        </div>
-    )
+    </div>
+  )
 }

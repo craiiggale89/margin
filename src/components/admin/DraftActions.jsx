@@ -66,7 +66,7 @@ export default function DraftActions({ draftId, status, hasArticle }) {
     }
 
     // Submitted - show review actions
-    if (status === 'SUBMITTED' || status === 'IN_REVIEW') {
+    if (status === 'SUBMITTED' || status === 'IN_REVIEW' || status === 'DRAFT' || status === 'REVISION_REQUESTED') {
         return (
             <div className="draft-actions">
                 <button
@@ -74,7 +74,7 @@ export default function DraftActions({ draftId, status, hasArticle }) {
                     className="btn btn-primary"
                     disabled={loading}
                 >
-                    Approve
+                    {status === 'DRAFT' || status === 'REVISION_REQUESTED' ? 'Mark as Approved' : 'Approve'}
                 </button>
                 <button
                     onClick={() => handleAction('revision')}

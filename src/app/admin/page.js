@@ -3,7 +3,7 @@ import AdminDashboardContent from '@/components/admin/AdminDashboardContent'
 
 async function getDashboardStats() {
   try {
-    const [pendingPitches, draftsInReview, publishedArticles, recentArticles] = await Promise.all([
+    const [pendingPitches, draftsInReview, publishedArticles, recentArticles, agents] = await Promise.all([
       prisma.pitch.count({ where: { status: 'SUBMITTED' } }),
       prisma.draft.count({ where: { status: 'SUBMITTED' } }),
       prisma.article.count({ where: { publishedAt: { not: null } } }),
@@ -12,11 +12,12 @@ async function getDashboardStats() {
         orderBy: { publishedAt: 'desc' },
         take: 5,
       }),
+      prisma.agent.findMany({ where: { active: true }, select: { id: true, name: true, focus: true } }),
     ])
 
-    return { pendingPitches, draftsInReview, publishedArticles, recentArticles }
+    return { pendingPitches, draftsInReview, publishedArticles, recentArticles, agents }
   } catch {
-    return { pendingPitches: 0, draftsInReview: 0, publishedArticles: 0, recentArticles: [] }
+    return { pendingPitches: 0, draftsInReview: 0, publishedArticles: 0, recentArticles: [], agents: [] }
   }
 }
 

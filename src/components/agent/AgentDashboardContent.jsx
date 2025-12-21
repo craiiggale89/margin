@@ -1,8 +1,46 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function AgentDashboardContent({ agent, pitchCounts, draftCounts, pendingPitches, approvedPitches, activeDrafts }) {
+    const router = useRouter()
+    const [generating, setGenerating] = useState(false)
+    const [aiMessage, setAiMessage] = useState('')
+
+    const handleBrainstorm = async () => {
+        setGenerating(true)
+        setAiMessage('Scanning headlines...')
+
+        try {
+            // Simulate scanning delay for effect
+            await new Promise(r => setTimeout(r, 1500))
+            setAiMessage('Drafting pitch...')
+
+            const res = await fetch('/api/ai/generate-pitch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ agentId: agent.id })
+            })
+
+            if (res.ok) {
+                setAiMessage('Success! Pitch submitted.')
+                setTimeout(() => {
+                    setGenerating(false)
+                    setAiMessage('')
+                    router.refresh()
+                }, 1500)
+            } else {
+                setAiMessage('Failed to generate.')
+                setTimeout(() => setGenerating(false), 2000)
+            }
+        } catch (error) {
+            console.error(error)
+            setGenerating(false)
+        }
+    }
+
     if (!agent) {
         return (
             <div className="agent-dashboard">
@@ -45,6 +83,13 @@ export default function AgentDashboardContent({ agent, pitchCounts, draftCounts,
             <section className="quick-actions">
                 <h2 className="section-title">Quick Actions</h2>
                 <div className="action-buttons">
+                    <button
+                        onClick={handleBrainstorm}
+                        className="btn btn-accent"
+                        disabled={generating}
+                    >
+                        {generating ? aiMessage : '✨ Brainstorm via AI'}
+                    </button>
                     <Link href="/agent/pitches/new" className="btn btn-primary">
                         Submit New Pitch
                     </Link>

@@ -13,20 +13,22 @@
     "setup": "prisma generate && prisma db push && node prisma/seed.js"
   },
   "dependencies": {
-    "next": "14.2.18",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "@prisma/client": "^5.22.0",
-    "next-auth": "^4.24.8",
+    "@tiptap/pm": "^2.9.1",
     "@tiptap/react": "^2.9.1",
     "@tiptap/starter-kit": "^2.9.1",
-    "@tiptap/pm": "^2.9.1",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "next": "14.2.18",
+    "next-auth": "^4.24.8",
+    "openai": "^6.15.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "rss-parser": "^3.13.0"
   },
   "devDependencies": {
-    "prisma": "^5.22.0",
     "eslint": "^8.57.0",
-    "eslint-config-next": "14.2.18"
+    "eslint-config-next": "14.2.18",
+    "prisma": "^5.22.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
