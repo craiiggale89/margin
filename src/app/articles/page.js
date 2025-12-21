@@ -1,6 +1,8 @@
 import prisma from '@/lib/db'
 import ArticlesContent from '@/components/articles/ArticlesContent'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata = {
     title: 'Articles | Margin',
     description: 'Writing on how performance in sport is built, expressed, and sometimes undone.',

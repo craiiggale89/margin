@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation'
 import prisma from '@/lib/db'
 import ArticleDetail from '@/components/articles/ArticleDetail'
 
+export const dynamic = 'force-dynamic'
+
 async function getArticle(slug) {
     try {
         const article = await prisma.article.findUnique({
