@@ -3,6 +3,8 @@ import prisma from '@/lib/db'
 import { requireEditor } from '@/lib/auth'
 import { refineArticle } from '@/lib/ai'
 
+export const dynamic = 'force-dynamic'
+
 export async function PATCH(request, { params }) {
     try {
         await requireEditor()

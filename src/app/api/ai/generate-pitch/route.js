@@ -3,6 +3,8 @@ import prisma from '@/lib/db'
 import { generatePitch } from '@/lib/ai'
 import { getSession } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request) {
     try {
         const session = await getSession()

@@ -1,6 +1,8 @@
 import prisma from '@/lib/db'
 import AdminDashboardContent from '@/components/admin/AdminDashboardContent'
 
+export const dynamic = 'force-dynamic'
+
 async function getDashboardStats() {
   try {
     const [pendingPitches, draftsInReview, publishedArticles, recentArticles, agents] = await Promise.all([

@@ -1,6 +1,8 @@
 import prisma from '@/lib/db'
 import AdminAgentsContent from '@/components/admin/AdminAgentsContent'
 
+export const dynamic = 'force-dynamic'
+
 async function getAgents() {
   try {
     const agents = await prisma.agent.findMany({
