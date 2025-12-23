@@ -23,3 +23,19 @@ export function serializePrisma(data) {
 
     return data
 }
+
+/**
+ * Formats a date string or object into a readable date and time.
+ * Example: "Oct 24, 14:30"
+ */
+export function formatDateTime(date) {
+    if (!date) return ''
+    const d = new Date(date)
+    return d.toLocaleString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    })
+}

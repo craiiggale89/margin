@@ -197,8 +197,11 @@ async function main() {
     console.log('Created article:', article.title)
 
     // Create a second article
-    const pitch2 = await prisma.pitch.create({
-        data: {
+    const pitch2 = await prisma.pitch.upsert({
+        where: { id: 'recovery-pitch' },
+        update: {},
+        create: {
+            id: 'recovery-pitch',
             title: 'After the Finish Line: What Recovery Actually Means',
             standfirst: 'The race is over, the result recorded. But for the athlete, a different kind of work is just beginning. Understanding recovery reveals as much about performance as the event itself.',
             angle: 'This piece examines recovery not as the absence of training, but as an active process shaped by physiology, psychology, and time.',
@@ -209,8 +212,10 @@ async function main() {
         },
     })
 
-    const draft2 = await prisma.draft.create({
-        data: {
+    const draft2 = await prisma.draft.upsert({
+        where: { pitchId: pitch2.id },
+        update: {},
+        create: {
             pitchId: pitch2.id,
             content: `<p>Three hours after crossing the finish line of a Grand Tour stage, most riders are not celebrating. They are managing fatigue.</p>
 
@@ -231,8 +236,10 @@ async function main() {
         },
     })
 
-    const article2 = await prisma.article.create({
-        data: {
+    const article2 = await prisma.article.upsert({
+        where: { slug: 'after-the-finish-line' },
+        update: {},
+        create: {
             slug: 'after-the-finish-line',
             title: 'After the Finish Line: What Recovery Actually Means',
             standfirst: 'The race is over, the result recorded. But for the athlete, a different kind of work is just beginning.',
@@ -249,20 +256,23 @@ async function main() {
     console.log('Created article:', article2.title)
 
     // Link articles as related
-    await prisma.articleRelation.create({
-        data: {
-            fromId: article.id,
-            toId: article2.id,
-        },
-    })
-
-    await prisma.articleRelation.create({
-        data: {
-            fromId: article2.id,
-            toId: article.id,
-        },
-    })
-    console.log('Linked articles as related')
+    try {
+        await prisma.articleRelation.create({
+            data: {
+                fromId: article.id,
+                toId: article2.id,
+            },
+        })
+        await prisma.articleRelation.create({
+            data: {
+                fromId: article2.id,
+                toId: article.id,
+            },
+        })
+        console.log('Linked articles as related')
+    } catch (e) {
+        console.log('Article relations already exist or failed to link.')
+    }
 
     console.log('\n✓ Database seeded successfully!')
     console.log('\nDemo credentials:')

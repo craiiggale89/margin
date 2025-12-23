@@ -1,6 +1,7 @@
 'use client'
 
 import PitchActions from '@/components/admin/PitchActions'
+import { formatDateTime } from '@/lib/utils'
 
 const statusLabels = {
     SUBMITTED: 'Submitted',
@@ -70,6 +71,9 @@ export default function AdminPitchesContent({ pendingPitches, otherPitches, pitc
                                         <span className="pitch-meta-item">
                                             <strong>Agent:</strong> {pitch.agent.name}
                                         </span>
+                                        <span className="pitch-meta-item">
+                                            <strong>Submitted:</strong> {formatDateTime(pitch.createdAt)}
+                                        </span>
                                     </div>
                                 </div>
 
@@ -94,7 +98,11 @@ export default function AdminPitchesContent({ pendingPitches, otherPitches, pitc
                                     </span>
                                 </div>
                                 <p className="pitch-card-standfirst text-muted">{pitch.standfirst}</p>
-                                <span className="text-sm text-subtle">By {pitch.agent.name}</span>
+                                <div className="pitch-meta-compact">
+                                    <span className="text-sm text-subtle">By {pitch.agent.name}</span>
+                                    <span className="text-sm text-subtle">•</span>
+                                    <span className="text-sm text-subtle">{formatDateTime(pitch.createdAt)}</span>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -145,6 +153,13 @@ export default function AdminPitchesContent({ pendingPitches, otherPitches, pitc
           font-size: var(--text-sm);
           color: var(--color-text-muted);
           margin-top: var(--space-4);
+        }
+        
+        .pitch-meta-compact {
+          display: flex;
+          gap: var(--space-2);
+          align-items: center;
+          margin-top: var(--space-2);
         }
         
         .empty-state {

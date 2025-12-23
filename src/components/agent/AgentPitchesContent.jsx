@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { formatDateTime } from '@/lib/utils'
 
 const statusLabels = {
     SUBMITTED: 'Submitted',
@@ -43,6 +44,9 @@ export default function AgentPitchesContent({ activePitches, approvedPitches, re
                                         {statusLabels[pitch.status]}
                                     </span>
                                 </div>
+                                <div className="pitch-card-meta">
+                                    <span className="text-sm text-subtle">Submitted on {formatDateTime(pitch.createdAt)}</span>
+                                </div>
                                 <p className="pitch-standfirst">{pitch.standfirst}</p>
 
                                 {pitch.status === 'REVISION_REQUESTED' && pitch.editorNotes && (
@@ -76,6 +80,9 @@ export default function AgentPitchesContent({ activePitches, approvedPitches, re
                                     <h3 className="pitch-card-title">{pitch.title}</h3>
                                     <span className="pitch-card-status approved">Approved</span>
                                 </div>
+                                <div className="pitch-card-meta">
+                                    <span className="text-sm text-subtle">Submitted on {formatDateTime(pitch.createdAt)}</span>
+                                </div>
                                 {pitch.draft && (
                                     <Link href={`/agent/drafts/${pitch.draft.id}`} className="btn btn-ghost btn-sm">
                                         View Draft →
@@ -97,6 +104,9 @@ export default function AgentPitchesContent({ activePitches, approvedPitches, re
                                 <div className="pitch-card-header">
                                     <h3 className="pitch-card-title">{pitch.title}</h3>
                                     <span className="pitch-card-status rejected">Rejected</span>
+                                </div>
+                                <div className="pitch-card-meta">
+                                    <span className="text-sm text-subtle">Submitted on {formatDateTime(pitch.createdAt)}</span>
                                 </div>
                                 {pitch.editorNotes && (
                                     <p className="text-sm text-muted">{pitch.editorNotes}</p>
@@ -146,6 +156,11 @@ export default function AgentPitchesContent({ activePitches, approvedPitches, re
         .pitch-standfirst {
           color: var(--color-text-secondary);
           margin-top: var(--space-2);
+        }
+        
+        .pitch-card-meta {
+          margin-top: var(--space-1);
+          margin-bottom: var(--space-2);
         }
         
         .editor-feedback {

@@ -60,7 +60,7 @@ export async function generateArticle({ pitch, agent }) {
 
     Format the output as clean HTML (using <h2>, <p> tags). 
     Do not include valid HTML boilerplate (<html>, <body>), just the content.
-    Do not include the headline in the body (it will be rendered separately).
+    Do not include the headline or the standfirst in the body (they are rendered separately by the UI).
     Use british english spelling.`;
 
     try {
