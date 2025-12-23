@@ -3,25 +3,36 @@ import Parser from 'rss-parser';
 const parser = new Parser();
 
 const FEEDS = {
-    'cycling': 'https://www.cyclingnews.com/feeds/all/',
-    'running': 'https://www.runnersworld.com/rss/all.xml',
-    'tech': 'https://techcrunch.com/feed/',
-    'general': 'http://feeds.bbci.co.uk/news/rss.xml'
+    'cycling': [
+        'https://www.cyclingnews.com/feeds/all/',
+        'https://www.cyclingweekly.com/feed',
+        'https://www.bikeradar.com/news/all/feed'
+    ],
+    'running': [
+        'https://www.runnersworld.com/rss/all.xml',
+        'https://athleticsweekly.com/news/feed/'
+    ],
+    'sport': [
+        'https://push.api.bbci.co.uk/pushed/bbc-sport/news/rss.xml',
+        'https://www.skysports.com/rss/12040'
+    ]
 };
 
 export async function getNewsForTopic(topic = '') {
     try {
         const lowerTopic = topic.toLowerCase();
-        let feedUrl = FEEDS.general;
+        let feeds = FEEDS.sport;
 
         if (lowerTopic.includes('cycl') || lowerTopic.includes('bike')) {
-            feedUrl = FEEDS.cycling;
+            feeds = FEEDS.cycling;
         } else if (lowerTopic.includes('run') || lowerTopic.includes('marathon')) {
-            feedUrl = FEEDS.running;
-        } else if (lowerTopic.includes('tech') || lowerTopic.includes('ai')) {
-            feedUrl = FEEDS.tech;
+            feeds = FEEDS.running;
         }
 
+        // Randomly select one feed from the category for variety
+        const feedUrl = feeds[Math.floor(Math.random() * feeds.length)];
+
+        console.log(`[News] Fetching from ${feedUrl}`);
         const feed = await parser.parseURL(feedUrl);
 
         // Get top 3 items

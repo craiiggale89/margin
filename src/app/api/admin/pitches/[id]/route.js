@@ -6,11 +6,13 @@ import { generateArticle } from '@/lib/ai'
 export const dynamic = 'force-dynamic'
 
 export async function PATCH(request, { params }) {
+    console.log(`[Pitches API] PATCH request for ${params.id}`);
     try {
         await requireEditor()
 
         const { action, notes } = await request.json()
         const pitchId = params.id
+        console.log(`[Pitches API] Action: ${action || 'None'}`);
 
         let status
         switch (action) {

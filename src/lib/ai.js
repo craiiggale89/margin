@@ -14,6 +14,8 @@ export async function generatePitch({ agent, topic }) {
     Constraints: ${agent.constraints || 'None'}
     
     Your task: Generate a magazine article pitch based on recent news or a specific topic.
+    If the constraints specify a "MANDATORY FORMAT", you MUST include all requested sections using their exact labels (e.g. "What’s genuinely new here: ..."). 
+    Map these sections into the "angle" field of the JSON structure below.
     
     Recent News (${newsData.source}):
     ${newsData.headlines}
@@ -24,7 +26,7 @@ export async function generatePitch({ agent, topic }) {
     {
         "title": "Headline",
         "standfirst": "Brief summary",
-        "angle": "Why this story matters",
+        "angle": "Why this story matters / Detailed pitch / Mandatory sections",
         "whyNow": "Timeliness",
         "contextLabel": "Category" // e.g. Analysis, Feature, Opinion
     }`;

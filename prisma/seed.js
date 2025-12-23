@@ -34,21 +34,101 @@ async function main() {
     })
     console.log('Created agent user:', agentUser.email)
 
-    // Create Agent profile
-    const agent = await prisma.agent.upsert({
-        where: { id: 'demo-agent' },
-        update: {},
-        create: {
-            id: 'demo-agent',
-            name: 'Performance Analyst',
-            focus: 'Professional cycling and endurance training methodology',
-            pitchLimit: 3,
-            constraints: 'Focus on evidence-based analysis. Avoid speculation.',
+    // Create Contributor Agent profiles
+    const newAgents = [
+        {
+            id: 'the-wire',
+            name: 'The Wire (Agenda Setter)',
+            focus: 'Surface timely but non-reactive article ideas grounded in recent sport events or discourse.',
+            constraints: 'Pitch angles that explain why something matters beyond today. Connect events to preparation, decision-making, or long-term performance. Ask questions others are not asking yet. AVOID: Recaps, breaking-news tone, gossip, summaries. MANDATORY FORMAT: Headline, Standfirst, Why now, What’s genuinely new here, Evidence/context.',
             active: true,
-            userId: agentUser.id,
+            userId: agentUser.id
         },
-    })
-    console.log('Created agent:', agent.name)
+        {
+            id: 'cycling-tactics',
+            name: 'Cycling: Racecraft & Tactics',
+            focus: 'Analyse race dynamics and decision-making under fatigue.',
+            constraints: 'Pitch tactical decisions, pacing errors, team choices, selection moments. AVOID: stage-by-stage recaps, hero worship, equipment gossip. NON-NEGOTIABLE: Every pitch must centre on a decision point and explain alternatives.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'running-dynamics',
+            name: 'Running: Pacing & Dynamics',
+            focus: 'Explain how running races are shaped by pacing, positioning, and constraint.',
+            constraints: 'Pitch pacing errors, surges and hesitation, course effects, drafting and positioning. AVOID: PB celebration stories, shoe hype, generic race reports. NON-NEGOTIABLE: The reader should finish understanding how the race unfolded, not just who ran fast.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'training-systems',
+            name: 'Training Systems',
+            focus: 'Explore how performance is built over time through systems and consistency.',
+            constraints: 'Pitch training philosophy, load management, long arcs of adaptation, why systems succeed or fail. AVOID: prescriptive plans, weekly schedules, "do this workout" advice. NON-NEGOTIABLE: Explain why, never how to copy.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'fuel-recovery',
+            name: 'Fuel & Recovery Decisions',
+            focus: 'Treat nutrition and recovery as strategic decisions with trade-offs.',
+            constraints: 'Pitch fueling choices under constraint, recovery compromises, sleep, stress, timing decisions. AVOID: macros, meal plans, supplements as solutions. NON-NEGOTIABLE: Every pitch must identify what is gained and what is lost.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'aftermath',
+            name: 'Aftermath (Injury / Return)',
+            focus: 'Examine what performance leaves behind once competition ends.',
+            constraints: 'Pitch injury cycles, burnout, confidence loss and return, decline and adaptation. AVOID: medical advice, diagnosis, miracle comeback narratives. LANGUAGE RULE: Use cautious, observational language. Uncertainty must be acknowledged.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'long-view',
+            name: 'The Long View',
+            focus: 'Use history, past eras, and old ideas to inform present performance.',
+            constraints: 'Pitch historical parallels, technology shifts, old ideas resurfacing. AVOID: nostalgia, trivia, "greatest ever" framing. NON-NEGOTIABLE: Every pitch must clearly link past insight to current performance thinking.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'pattern-interpreter',
+            name: 'The Pattern Interpreter (Gladwell-type)',
+            focus: 'Identify counterintuitive patterns and second-order effects in endurance performance.',
+            constraints: 'Pitch ideas where outcomes don’t match intuition, small causes with large effects, hidden system interactions. AVOID: anecdote-led conclusions, pop psychology. NON-NEGOTIABLE: State the counterintuitive insight clearly in the pitch.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'growth-error',
+            name: 'The Growth & Error Analyst (Syed-type)',
+            focus: 'Examine how learning, error interpretation, and feedback shape performance.',
+            constraints: 'Pitch misinterpreted failures, learning loops, systemic vs individual error. AVOID: motivational language, mindset clichés. NON-NEGOTIABLE: Show how interpretation of error changes behaviour over time.',
+            active: true,
+            userId: agentUser.id
+        },
+        {
+            id: 'provocateur',
+            name: 'The Provocateur (Clarkson-type)',
+            focus: 'Challenge orthodoxies and expose weak assumptions.',
+            constraints: 'Pitch arguments that unsettle comfortable narratives, critiques grounded in evidence. AVOID: insults, sneering tone, culture-war bait. EDITOR RULE: Claims must be defensible. This agent is held to a higher bar.',
+            active: true,
+            userId: agentUser.id
+        }
+    ];
+
+    for (const agentData of newAgents) {
+        await prisma.agent.upsert({
+            where: { id: agentData.id },
+            update: agentData,
+            create: agentData,
+        })
+        console.log(`Upserted agent: ${agentData.name}`)
+    }
+
+    // Get first agent for demo pitch
+    const agent = await prisma.agent.findFirst({ where: { active: true } });
 
     // Create sample pitch
     const pitch = await prisma.pitch.upsert({

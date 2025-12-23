@@ -2,7 +2,23 @@ import prisma from '@/lib/db'
 import { serializePrisma } from '@/lib/utils'
 import AdminPitchesContent from '@/components/admin/AdminPitchesContent'
 
-// ... (Pitches list mapping) ...
+async function getPitches() {
+    try {
+        const pitches = await prisma.pitch.findMany({
+            include: {
+                agent: true,
+            },
+            orderBy: [
+                { status: 'asc' },
+                { createdAt: 'desc' },
+            ],
+        })
+        return pitches
+    } catch (error) {
+        console.error('Failed to fetch pitches:', error)
+        return []
+    }
+}
 
 export default async function PitchesPage() {
     const pitches = await getPitches()
