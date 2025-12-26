@@ -34,12 +34,23 @@ export async function GET(request) {
             console.log('[Cron] Running in DEBUG mode (unauthenticated)');
         }
 
+        // Fetch Global Settings
+        let settings = await prisma.settings.findUnique({ where: { id: 'global' } })
+        if (!settings) {
+            settings = await prisma.settings.create({ data: { id: 'global', cronEnabled: true, maxPitchesPerAgent: 1 } })
+        }
+
+        if (!settings.cronEnabled && !isDebug) {
+            console.log('[Cron] Automated pitching is currently DISABLED in settings');
+            return NextResponse.json({ message: 'Cron is disabled in settings' })
+        }
+
         // Fetch Active Agents
         const agents = await prisma.agent.findMany({
             where: { active: true }
         })
 
-        console.log(`[Cron] Found ${agents.length} active agents`);
+        console.log(`[Cron] Found ${agents.length} active agents. Max pitches per agent: ${settings.maxPitchesPerAgent}`);
 
         if (!agents.length) {
             console.log('[Cron] No active agents - terminating');
@@ -51,31 +62,37 @@ export async function GET(request) {
 
         console.log('[Cron] Starting pitch generation for agents:', agents.map(a => a.name).join(', '));
 
-        const promises = agents.map(async (agent) => {
-            try {
-                console.log(`[Cron] Generating pitch for agent: ${agent.name}`);
-                const pitchContent = await generatePitch({ agent })
+        const promises = agents.flatMap((agent) => {
+            const agentPromises = []
+            for (let i = 0; i < settings.maxPitchesPerAgent; i++) {
+                agentPromises.push((async () => {
+                    try {
+                        console.log(`[Cron] Generating pitch ${i + 1}/${settings.maxPitchesPerAgent} for agent: ${agent.name}`);
+                        const pitchContent = await generatePitch({ agent })
 
-                console.log(`[Cron] Pitch generated for ${agent.name}: "${pitchContent.title}"`);
+                        console.log(`[Cron] Pitch generated for ${agent.name}: "${pitchContent.title}"`);
 
-                const pitch = await prisma.pitch.create({
-                    data: {
-                        title: pitchContent.title,
-                        standfirst: pitchContent.standfirst,
-                        angle: pitchContent.angle,
-                        whyNow: pitchContent.whyNow,
-                        contextLabel: pitchContent.contextLabel,
-                        estimatedTime: 5,
-                        agentId: agent.id,
-                        status: 'SUBMITTED',
+                        const pitch = await prisma.pitch.create({
+                            data: {
+                                title: pitchContent.title,
+                                standfirst: pitchContent.standfirst,
+                                angle: pitchContent.angle,
+                                whyNow: pitchContent.whyNow,
+                                contextLabel: pitchContent.contextLabel,
+                                estimatedTime: 5,
+                                agentId: agent.id,
+                                status: 'SUBMITTED',
+                            }
+                        })
+                        console.log(`[Cron] Pitch saved to DB for ${agent.name} with ID: ${pitch.id}`);
+                        return { agent: agent.name, status: 'success', pitchId: pitch.id }
+                    } catch (e) {
+                        console.error(`[Cron] Failed for agent ${agent.name} (pitch ${i + 1}):`, e)
+                        return { agent: agent.name, status: 'failed', error: e.message }
                     }
-                })
-                console.log(`[Cron] Pitch saved to DB for ${agent.name} with ID: ${pitch.id}`);
-                return { agent: agent.name, status: 'success', pitchId: pitch.id }
-            } catch (e) {
-                console.error(`[Cron] Failed for agent ${agent.name}:`, e)
-                return { agent: agent.name, status: 'failed', error: e.message }
+                })())
             }
+            return agentPromises
         })
 
         results.push(...await Promise.all(promises))

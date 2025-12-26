@@ -94,3 +94,10 @@ model ArticleRelation {
   
   @@unique([fromId, toId])
 }
+
+model Settings {
+  id                 String   @id @default("global")
+  cronEnabled        Boolean  @default(true)
+  maxPitchesPerAgent Int      @default(1)
+  updatedAt          DateTime @updatedAt
+}

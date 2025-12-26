@@ -47,3 +47,18 @@ export async function getNewsForTopic(topic = '') {
         return { source: 'None', headlines: 'No recent news available due to fetch error.' };
     }
 }
+
+export async function getAllRecentHeadlines() {
+    const results = {};
+    for (const category of Object.keys(FEEDS)) {
+        try {
+            const feedUrl = FEEDS[category][0]; // Just take first one for dashboard summary
+            const feed = await parser.parseURL(feedUrl);
+            results[category] = feed.items.slice(0, 3).map(item => item.title);
+        } catch (error) {
+            console.error(`Failed to fetch news for ${category}:`, error);
+            results[category] = [];
+        }
+    }
+    return results;
+}
