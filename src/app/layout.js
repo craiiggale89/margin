@@ -1,3 +1,4 @@
+// Trigger Vercel Deployment Hook
 import '@/styles/globals.css'
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
