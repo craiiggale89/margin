@@ -8,6 +8,7 @@ const navItems = [
     { href: '/admin/pitches', label: 'Pitches' },
     { href: '/admin/drafts', label: 'Drafts' },
     { href: '/admin/articles', label: 'Articles' },
+    { href: '/admin/analytics', label: 'Analytics' },
     { href: '/admin/agents', label: 'Agents' },
 ]
 

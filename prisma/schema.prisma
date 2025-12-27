@@ -83,6 +83,9 @@ model Article {
   // Related articles (many-to-many self-relation)
   relatedTo     ArticleRelation[] @relation("ArticleFrom")
   relatedFrom   ArticleRelation[] @relation("ArticleTo")
+  
+  // Analytics
+  pageViews     PageView[]
 }
 
 model ArticleRelation {
@@ -100,4 +103,18 @@ model Settings {
   cronEnabled        Boolean  @default(true)
   maxPitchesPerAgent Int      @default(1)
   updatedAt          DateTime @updatedAt
+}
+
+model PageView {
+  id         String   @id @default(cuid())
+  articleId  String
+  article    Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  sessionId  String?  // Anonymous session identifier
+  duration   Int?     // Time on page in seconds
+  userAgent  String?
+  referrer   String?
+  createdAt  DateTime @default(now())
+  
+  @@index([articleId])
+  @@index([createdAt])
 }

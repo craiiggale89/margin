@@ -1,8 +1,12 @@
 'use client'
 
 import Link from 'next/link'
+import usePageView from '@/hooks/usePageView'
 
 export default function ArticleDetail({ article, relatedArticles }) {
+    // Track page view with time on page
+    usePageView(article?.id)
+
     return (
         <article className="article-page">
             {/* Article Header */}
