@@ -11,7 +11,7 @@ export async function PATCH(request, { params }) {
         await requireEditor()
 
         const body = await request.json()
-        const { action, content, notes, slug, contextLabel, readingTime, featured, sportFilter } = body
+        const { action, content, title, standfirst, notes, slug, contextLabel, readingTime, featured, sportFilter } = body
         const draftId = params.id
 
         console.log(`[Drafts API] Action: ${action || 'None'}${content ? ', Title/Content update' : ''}`);
