@@ -78,6 +78,8 @@ export async function PATCH(request, { params }) {
                 prisma.draft.create({
                     data: {
                         pitchId: pitchId,
+                        title: currentPitch.title,
+                        standfirst: currentPitch.standfirst,
                         content: aiContent,
                         status: 'DRAFT',
                     },

@@ -16,11 +16,16 @@ export async function PATCH(request, { params }) {
 
         console.log(`[Drafts API] Action: ${action || 'None'}${content ? ', Title/Content update' : ''}`);
 
-        // Update content
-        if (content !== undefined) {
+        // Update content/title/standfirst
+        if (content !== undefined || title !== undefined || standfirst !== undefined) {
+            const updateData = {}
+            if (content !== undefined) updateData.content = content
+            if (title !== undefined) updateData.title = title
+            if (standfirst !== undefined) updateData.standfirst = standfirst
+
             await prisma.draft.update({
                 where: { id: draftId },
-                data: { content },
+                data: updateData,
             })
             return NextResponse.json({ success: true })
         }
@@ -85,8 +90,8 @@ export async function PATCH(request, { params }) {
                     const article = await prisma.article.create({
                         data: {
                             slug,
-                            title: draft.pitch.title,
-                            standfirst: draft.pitch.standfirst,
+                            title: draft.title || draft.pitch.title,
+                            standfirst: draft.standfirst || draft.pitch.standfirst,
                             content: draft.content,
                             contextLabel: contextLabel || draft.pitch.contextLabel,
                             byline: 'By Margin',

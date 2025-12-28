@@ -60,7 +60,8 @@ export async function generateArticle({ pitch, agent }) {
 
     Format the output as clean HTML (using <h2>, <p> tags). 
     Do not include valid HTML boilerplate (<html>, <body>), just the content.
-    Do not include the headline or the standfirst in the body (they are rendered separately by the UI).
+    CRITICAL: Do not include the headline (title) or the standfirst in the body. They are already displayed by the UI.
+    Your response should start immediately with either the first H2 or the first paragraph of the article.
     Use british english spelling.`;
 
     try {
@@ -89,6 +90,7 @@ export async function refineArticle({ currentContent, feedback, agent }) {
     - Rewrite or edit the content below to address the feedback.
     - Maintain the original tone and style unless asked to change.
     - Output only the new HTML content (no boilerplate).
+    - CRITICAL: Do not include the article title or standfirst in your response. If they are present in the "CURRENT DRAFT" below, REMOVE them.
     - Use british english spelling.
 
     CURRENT DRAFT:

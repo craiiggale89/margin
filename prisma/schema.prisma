@@ -51,6 +51,8 @@ model Pitch {
 
 model Draft {
   id          String   @id @default(cuid())
+  title       String?
+  standfirst  String?
   content     String
   editorNotes String?
   status      String   @default("DRAFT") // DRAFT, SUBMITTED, IN_REVIEW, REVISION_REQUESTED, APPROVED

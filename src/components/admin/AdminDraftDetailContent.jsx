@@ -7,6 +7,9 @@ import DraftActions from '@/components/admin/DraftActions'
 export default function AdminDraftDetailContent({ draft }) {
   const [isRefining, setIsRefining] = useState(false)
   const [refineFeedback, setRefineFeedback] = useState('')
+  const [title, setTitle] = useState(draft.title || draft.pitch.title)
+  const [standfirst, setStandfirst] = useState(draft.standfirst || draft.pitch.standfirst)
+  const [isSavingHeader, setIsSavingHeader] = useState(false)
 
   const handleRefine = async () => {
     setIsRefining(true)
@@ -29,19 +32,54 @@ export default function AdminDraftDetailContent({ draft }) {
       setIsRefining(false)
     }
   }
+
+  const handleSaveHeader = async () => {
+    setIsSavingHeader(true)
+    try {
+      const res = await fetch(`/api/admin/drafts/${draft.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, standfirst }),
+      })
+      if (res.ok) {
+        // Success feedback could be added here
+      }
+    } catch (error) {
+      console.error('Failed to save header:', error)
+    } finally {
+      setIsSavingHeader(false)
+    }
+  }
+
   return (
     <div className="draft-detail-page">
       <header className="draft-header">
         <div className="draft-header-content">
-          {draft.pitch.contextLabel && (
-            <span className="context-label">{draft.pitch.contextLabel}</span>
-          )}
-          <h1 className="draft-title">{draft.pitch.title}</h1>
-          <p className="draft-standfirst">{draft.pitch.standfirst}</p>
+          <div className="header-edit-group">
+            {draft.pitch.contextLabel && (
+              <span className="context-label">{draft.pitch.contextLabel}</span>
+            )}
+            <input
+              className="draft-title-input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={handleSaveHeader}
+              placeholder="Article Title"
+            />
+            <textarea
+              className="draft-standfirst-input"
+              value={standfirst}
+              onChange={(e) => setStandfirst(e.target.value)}
+              onBlur={handleSaveHeader}
+              placeholder="Article Standfirst"
+              rows={2}
+            />
+          </div>
           <div className="metadata">
             <span>By {draft.pitch.agent.name}</span>
             <span className="metadata-separator"></span>
             <span>{draft.pitch.estimatedTime} min read</span>
+            {isSavingHeader && <span className="save-indicator">Saving...</span>}
           </div>
         </div>
 
@@ -108,17 +146,55 @@ export default function AdminDraftDetailContent({ draft }) {
         .draft-header-content {
           flex: 1;
         }
-        
-        .draft-title {
-          font-size: var(--text-3xl);
-          margin-top: var(--space-3);
-          margin-bottom: var(--space-4);
+
+        .header-edit-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+            margin-bottom: var(--space-4);
         }
-        
-        .draft-standfirst {
-          font-size: var(--text-lg);
-          color: var(--color-text-secondary);
-          margin-bottom: var(--space-4);
+
+        .draft-title-input {
+            font-family: var(--font-serif);
+            font-size: var(--text-3xl);
+            font-weight: 700;
+            border: 1px solid transparent;
+            background: transparent;
+            width: 100%;
+            padding: var(--space-1) 0;
+            color: var(--color-text);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .draft-title-input:hover, .draft-title-input:focus {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .draft-standfirst-input {
+            font-family: var(--font-sans);
+            font-size: var(--text-lg);
+            color: var(--color-text-secondary);
+            border: 1px solid transparent;
+            background: transparent;
+            width: 100%;
+            padding: var(--space-1) 0;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+            transition: border-color 0.2s;
+        }
+
+        .draft-standfirst-input:hover, .draft-standfirst-input:focus {
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .save-indicator {
+            font-size: var(--text-xs);
+            color: var(--color-text-muted);
+            margin-left: var(--space-4);
+            font-style: italic;
         }
         
         .draft-content {
