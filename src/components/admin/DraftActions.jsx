@@ -62,6 +62,13 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
                 >
                     Publish Article
                 </button>
+                <button
+                    onClick={() => handleAction('unapprove')}
+                    className="btn btn-secondary"
+                    disabled={loading}
+                >
+                    {loading ? 'Unapproving...' : 'Unapprove'}
+                </button>
             </div>
         )
     }

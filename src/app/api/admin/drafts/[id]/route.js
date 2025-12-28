@@ -49,6 +49,13 @@ export async function PATCH(request, { params }) {
                     })
                     break
 
+                case 'unapprove':
+                    await prisma.draft.update({
+                        where: { id: draftId },
+                        data: { status: 'DRAFT' },
+                    })
+                    break
+
                 case 'revision':
                     await prisma.draft.update({
                         where: { id: draftId },
