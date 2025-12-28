@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 
@@ -32,6 +32,13 @@ export default function DraftEditor({ draftId, initialContent, isReadOnly = fals
             // Debounced auto-save could be added here
         },
     })
+
+    // Update editor editable state when prop changes
+    useEffect(() => {
+        if (editor) {
+            editor.setEditable(!isReadOnly)
+        }
+    }, [isReadOnly, editor])
 
     const handleSave = () => {
         if (editor) {
