@@ -87,6 +87,13 @@ export default function AdminDraftDetailContent({ draft }) {
           draftId={draft.id}
           status={draft.status}
           hasArticle={!!draft.article}
+          draftData={{
+            title,
+            standfirst,
+            contextLabel: draft.pitch.contextLabel,
+            readingTime: draft.pitch.estimatedTime,
+            // Add other fields if necessary
+          }}
         />
       </header>
 

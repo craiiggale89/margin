@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function DraftActions({ draftId, status, hasArticle }) {
+export default function DraftActions({ draftId, status, hasArticle, draftData = {} }) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [showPublish, setShowPublish] = useState(false)
@@ -38,6 +38,7 @@ export default function DraftActions({ draftId, status, hasArticle }) {
                 onPublish={(data) => handleAction('publish', data)}
                 onCancel={() => setShowPublish(false)}
                 loading={loading}
+                initialData={draftData}
             />
         )
     }
@@ -90,12 +91,14 @@ export default function DraftActions({ draftId, status, hasArticle }) {
     return null
 }
 
-function PublishForm({ onPublish, onCancel, loading }) {
-    const [slug, setSlug] = useState('')
-    const [contextLabel, setContextLabel] = useState('')
-    const [readingTime, setReadingTime] = useState('')
+function PublishForm({ onPublish, onCancel, loading, initialData }) {
+    const generateSlug = (text) => text.toLowerCase().trim().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+
+    const [slug, setSlug] = useState(initialData.title ? generateSlug(initialData.title) : '')
+    const [contextLabel, setContextLabel] = useState(initialData.contextLabel || '')
+    const [readingTime, setReadingTime] = useState(initialData.readingTime || '5')
     const [featured, setFeatured] = useState(false)
-    const [sportFilter, setSportFilter] = useState('')
+    const [sportFilter, setSportFilter] = useState(initialData.sportFilter || '')
 
     const handleSubmit = (e) => {
         e.preventDefault()
