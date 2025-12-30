@@ -105,6 +105,33 @@ export async function PATCH(request, { params }) {
                         review: reviewResult
                     })
 
+                case 'updatePublished':
+                    // Update the published article with draft content
+                    const linkedArticle = await prisma.article.findUnique({
+                        where: { draftId: draft.id }
+                    })
+
+                    if (!linkedArticle) {
+                        return NextResponse.json({ error: 'No published article found for this draft' }, { status: 404 })
+                    }
+
+                    await prisma.article.update({
+                        where: { id: linkedArticle.id },
+                        data: {
+                            title: draft.title || linkedArticle.title,
+                            standfirst: draft.standfirst || linkedArticle.standfirst,
+                            content: draft.content
+                        }
+                    })
+
+                    // Clear the editor notes since update is complete
+                    await prisma.draft.update({
+                        where: { id: draftId },
+                        data: { editorNotes: null }
+                    })
+
+                    return NextResponse.json({ success: true, message: 'Published article updated' })
+
                 case 'publish':
                     // Create the article
                     const article = await prisma.article.create({

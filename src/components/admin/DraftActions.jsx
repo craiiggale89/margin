@@ -67,8 +67,8 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
         )
     }
 
-    // Already published
-    if (hasArticle) {
+    // Already published AND no pending changes
+    if (hasArticle && status === 'APPROVED') {
         return (
             <div className="draft-actions">
                 <span className="published-badge">Published</span>
@@ -76,8 +76,8 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
         )
     }
 
-    // Approved - show publish button
-    if (status === 'APPROVED') {
+    // Approved with pending changes (upgraded draft) - show update button
+    if (status === 'APPROVED' && !hasArticle) {
         return (
             <div className="draft-actions">
                 <button
@@ -93,6 +93,22 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
                 >
                     {loading ? 'Unapproving...' : 'Unapprove'}
                 </button>
+            </div>
+        )
+    }
+
+    // Approved draft with article - can update the published article
+    if (status === 'APPROVED' && hasArticle) {
+        return (
+            <div className="draft-actions">
+                <button
+                    onClick={() => handleAction('updatePublished')}
+                    className="btn btn-primary"
+                    disabled={loading}
+                >
+                    {loading ? 'Updating...' : 'Update Published Article'}
+                </button>
+                <span className="published-badge">Published</span>
             </div>
         )
     }
