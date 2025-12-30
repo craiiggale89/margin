@@ -7,6 +7,8 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [showPublish, setShowPublish] = useState(false)
+    const [reviewResult, setReviewResult] = useState(null)
+    const [reviewLoading, setReviewLoading] = useState(false)
 
     const handleAction = async (action, data = {}) => {
         setLoading(true)
@@ -28,6 +30,28 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
             console.error('Action failed:', error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleQualityReview = async () => {
+        setReviewLoading(true)
+        setReviewResult(null)
+
+        try {
+            const res = await fetch(`/api/admin/drafts/${draftId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'review' }),
+            })
+
+            if (res.ok) {
+                const data = await res.json()
+                setReviewResult(data.review)
+            }
+        } catch (error) {
+            console.error('Quality review failed:', error)
+        } finally {
+            setReviewLoading(false)
         }
     }
 
@@ -76,26 +100,136 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
     // Submitted - show review actions
     if (status === 'SUBMITTED' || status === 'IN_REVIEW' || status === 'DRAFT' || status === 'REVISION_REQUESTED') {
         return (
-            <div className="draft-actions">
-                <button
-                    onClick={() => handleAction('approve')}
-                    className="btn btn-primary"
-                    disabled={loading}
-                >
-                    {status === 'DRAFT' || status === 'REVISION_REQUESTED' ? 'Mark as Approved' : 'Approve'}
-                </button>
-                <button
-                    onClick={() => handleAction('revision')}
-                    className="btn btn-secondary"
-                    disabled={loading}
-                >
-                    Request Revision
-                </button>
-            </div>
+            <>
+                <div className="draft-actions">
+                    <button
+                        onClick={handleQualityReview}
+                        className="btn btn-outline"
+                        disabled={reviewLoading}
+                    >
+                        {reviewLoading ? 'Reviewing...' : 'Quality Review'}
+                    </button>
+                    <button
+                        onClick={() => handleAction('approve')}
+                        className="btn btn-primary"
+                        disabled={loading}
+                    >
+                        {status === 'DRAFT' || status === 'REVISION_REQUESTED' ? 'Mark as Approved' : 'Approve'}
+                    </button>
+                    <button
+                        onClick={() => handleAction('revision')}
+                        className="btn btn-secondary"
+                        disabled={loading}
+                    >
+                        Request Revision
+                    </button>
+                </div>
+
+                {reviewResult && (
+                    <ReviewResultPanel result={reviewResult} onDismiss={() => setReviewResult(null)} />
+                )}
+            </>
         )
     }
 
     return null
+}
+
+function ReviewResultPanel({ result, onDismiss }) {
+    const verdictStyles = {
+        READY: { bg: 'var(--color-success-bg)', border: 'var(--color-success)', icon: '✅' },
+        REVISE: { bg: 'var(--color-warning-bg)', border: 'var(--color-warning)', icon: '⚠️' },
+        REJECT: { bg: 'var(--color-error-bg)', border: 'var(--color-error)', icon: '❌' },
+    }
+
+    const style = verdictStyles[result.verdict] || verdictStyles.REVISE
+
+    return (
+        <div className="review-panel" style={{ backgroundColor: style.bg, borderColor: style.border }}>
+            <div className="review-header">
+                <span className="review-verdict">{style.icon} {result.verdict}</span>
+                <button onClick={onDismiss} className="review-dismiss">✕</button>
+            </div>
+
+            {result.reasons && result.reasons.length > 0 && (
+                <div className="review-section">
+                    <h4>Reasons</h4>
+                    <ul>
+                        {result.reasons.map((reason, i) => (
+                            <li key={i}>{reason}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {result.verdict === 'REVISE' && result.requiredFixes && result.requiredFixes.length > 0 && (
+                <div className="review-section">
+                    <h4>Required Fixes</h4>
+                    <ul>
+                        {result.requiredFixes.map((fix, i) => (
+                            <li key={i}>{fix}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            <style jsx>{`
+                .review-panel {
+                    margin-top: var(--space-4);
+                    padding: var(--space-4);
+                    border: 1px solid;
+                    border-radius: 6px;
+                }
+                
+                .review-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: var(--space-3);
+                }
+                
+                .review-verdict {
+                    font-weight: 600;
+                    font-size: var(--text-lg);
+                }
+                
+                .review-dismiss {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: var(--text-lg);
+                    opacity: 0.6;
+                }
+                
+                .review-dismiss:hover {
+                    opacity: 1;
+                }
+                
+                .review-section {
+                    margin-top: var(--space-3);
+                }
+                
+                .review-section h4 {
+                    font-size: var(--text-sm);
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: var(--tracking-wider);
+                    color: var(--color-text-muted);
+                    margin-bottom: var(--space-2);
+                }
+                
+                .review-section ul {
+                    margin: 0;
+                    padding-left: var(--space-4);
+                }
+                
+                .review-section li {
+                    font-size: var(--text-sm);
+                    margin-bottom: var(--space-1);
+                }
+            `}</style>
+        </div>
+    )
 }
 
 function PublishForm({ onPublish, onCancel, loading, initialData }) {

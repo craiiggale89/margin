@@ -2,6 +2,7 @@ import prisma from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth-options'
 import { NextResponse } from 'next/server'
+import { upgradeArticle } from '@/lib/ai'
 
 export async function PATCH(request, { params }) {
     try {
@@ -11,8 +12,33 @@ export async function PATCH(request, { params }) {
         }
 
         const body = await request.json()
-        const { title, standfirst, content, contextLabel, byline, imageUrl, featured, sportFilter } = body
+        const { action, title, standfirst, content, contextLabel, byline, imageUrl, featured, sportFilter } = body
 
+        // Handle upgrade action
+        if (action === 'upgrade') {
+            const article = await prisma.article.findUnique({
+                where: { id: params.id }
+            })
+
+            if (!article) {
+                return NextResponse.json({ error: 'Article not found' }, { status: 404 })
+            }
+
+            const upgradedContent = await upgradeArticle({
+                content: article.content,
+                title: article.title,
+                standfirst: article.standfirst
+            })
+
+            const updatedArticle = await prisma.article.update({
+                where: { id: params.id },
+                data: { content: upgradedContent }
+            })
+
+            return NextResponse.json({ success: true, article: updatedArticle })
+        }
+
+        // Regular update
         const article = await prisma.article.update({
             where: { id: params.id },
             data: {

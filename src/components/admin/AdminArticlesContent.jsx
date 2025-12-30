@@ -1,8 +1,34 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 export default function AdminArticlesContent({ articles, publishedArticles, scheduledArticles }) {
+    const router = useRouter()
+    const [upgradingId, setUpgradingId] = useState(null)
+    const [upgradedIds, setUpgradedIds] = useState(new Set())
+
+    const handleUpgrade = async (articleId) => {
+        setUpgradingId(articleId)
+        try {
+            const res = await fetch(`/api/admin/articles/${articleId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'upgrade' }),
+            })
+
+            if (res.ok) {
+                setUpgradedIds(prev => new Set([...prev, articleId]))
+                router.refresh()
+            }
+        } catch (error) {
+            console.error('Upgrade failed:', error)
+        } finally {
+            setUpgradingId(null)
+        }
+    }
+
     return (
         <div className="admin-articles-page">
             <header className="admin-header">
@@ -42,6 +68,13 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
                                     {article.featured && <span className="featured-badge">★</span>}
                                 </span>
                                 <div className="col-actions">
+                                    <button
+                                        onClick={() => handleUpgrade(article.id)}
+                                        disabled={upgradingId === article.id || upgradedIds.has(article.id)}
+                                        className={`btn btn-outline btn-sm ${upgradedIds.has(article.id) ? 'btn-success' : ''}`}
+                                    >
+                                        {upgradingId === article.id ? 'Upgrading...' : upgradedIds.has(article.id) ? '✓ Upgraded' : 'Upgrade'}
+                                    </button>
                                     <Link href={`/admin/articles/${article.id}`} className="btn btn-ghost btn-sm">
                                         Edit
                                     </Link>
@@ -107,7 +140,7 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
         
         .table-header {
           display: grid;
-          grid-template-columns: 1fr 120px 80px 80px;
+          grid-template-columns: 1fr 120px 80px 160px;
           gap: var(--space-4);
           padding: var(--space-3) var(--space-4);
           background-color: var(--color-bg-alt);
@@ -120,7 +153,7 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
         
         .table-row {
           display: grid;
-          grid-template-columns: 1fr 120px 80px 80px;
+          grid-template-columns: 1fr 120px 80px 160px;
           gap: var(--space-4);
           padding: var(--space-4);
           border-top: 1px solid var(--color-border-subtle);
@@ -149,6 +182,16 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
         .btn-sm {
           padding: var(--space-1) var(--space-3);
           font-size: var(--text-sm);
+        }
+        
+        .col-actions {
+          display: flex;
+          gap: var(--space-2);
+        }
+        
+        .btn-success {
+          border-color: var(--color-success);
+          color: var(--color-success);
         }
         
         .empty-state {

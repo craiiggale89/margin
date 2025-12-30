@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireEditor } from '@/lib/auth'
-import { refineArticle } from '@/lib/ai'
+import { refineArticle, reviewDraft } from '@/lib/ai'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,6 +91,19 @@ export async function PATCH(request, { params }) {
                         },
                     })
                     break
+
+                case 'review':
+                    // Run Quality Review Agent
+                    const reviewResult = await reviewDraft({
+                        content: draft.content,
+                        title: draft.title || draft.pitch.title,
+                        standfirst: draft.standfirst || draft.pitch.standfirst
+                    })
+
+                    return NextResponse.json({
+                        success: true,
+                        review: reviewResult
+                    })
 
                 case 'publish':
                     // Create the article
