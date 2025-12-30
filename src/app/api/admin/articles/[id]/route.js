@@ -14,10 +14,11 @@ export async function PATCH(request, { params }) {
         const body = await request.json()
         const { action, title, standfirst, content, contextLabel, byline, imageUrl, featured, sportFilter } = body
 
-        // Handle upgrade action
+        // Handle upgrade action - creates draft for review instead of direct update
         if (action === 'upgrade') {
             const article = await prisma.article.findUnique({
-                where: { id: params.id }
+                where: { id: params.id },
+                include: { draft: true }
             })
 
             if (!article) {
@@ -30,12 +31,21 @@ export async function PATCH(request, { params }) {
                 standfirst: article.standfirst
             })
 
-            const updatedArticle = await prisma.article.update({
-                where: { id: params.id },
-                data: { content: upgradedContent }
+            // Update the linked draft with upgraded content for review
+            await prisma.draft.update({
+                where: { id: article.draftId },
+                data: {
+                    content: upgradedContent,
+                    status: 'SUBMITTED',
+                    editorNotes: 'Quality upgrade applied - awaiting review'
+                }
             })
 
-            return NextResponse.json({ success: true, article: updatedArticle })
+            return NextResponse.json({
+                success: true,
+                message: 'Upgrade created as draft for review',
+                draftId: article.draftId
+            })
         }
 
         // Regular update

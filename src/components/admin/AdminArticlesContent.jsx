@@ -73,7 +73,7 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
                                         disabled={upgradingId === article.id || upgradedIds.has(article.id)}
                                         className={`btn btn-outline btn-sm ${upgradedIds.has(article.id) ? 'btn-success' : ''}`}
                                     >
-                                        {upgradingId === article.id ? 'Upgrading...' : upgradedIds.has(article.id) ? '✓ Upgraded' : 'Upgrade'}
+                                        {upgradingId === article.id ? 'Upgrading...' : upgradedIds.has(article.id) ? '✓ Draft Created' : 'Upgrade'}
                                     </button>
                                     <Link href={`/admin/articles/${article.id}`} className="btn btn-ghost btn-sm">
                                         Edit
