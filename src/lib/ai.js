@@ -79,7 +79,7 @@ export async function generatePitch({ agent, topic }) {
     }
 }
 
-export async function generateArticle({ pitch, agent }) {
+export async function generateArticle({ pitch, agent, research = null }) {
     // Determine agent type based on focus for agent-type specific rules
     const agentFocus = (agent.focus || '').toLowerCase();
     const isRacecraftPacing = agentFocus.includes('racecraft') || agentFocus.includes('pacing') || agentFocus.includes('tactics');
@@ -104,6 +104,29 @@ export async function generateArticle({ pitch, agent }) {
     The contradiction must be explicitly acknowledged and engaged with, not dismissed.`;
     }
 
+    // Format research data if provided
+    let researchSection = '';
+    if (research && research.anchors && research.anchors.length > 0) {
+        const anchorLines = research.anchors.map((anchor, i) => {
+            return `ANCHOR ${i + 1} (${anchor.type}):
+Event: ${anchor.event || 'N/A'}
+Situation: ${anchor.situation}
+Consequence: ${anchor.consequence}`;
+        }).join('\n\n');
+
+        researchSection = `
+    === RESEARCHED ANCHORS (MANDATORY USE) ===
+    
+    The following anchors have been researched and verified from real sources.
+    You MUST use at least 3 of these in your article.
+    Do NOT invent alternative anchors — use these specific situations.
+    
+${anchorLines}
+    
+    === END RESEARCH ===
+`;
+    }
+
     const systemPrompt = `You are ${agent.name}, a professional journalist for Margin, a digital magazine about endurance performance.
     Focus: ${agent.focus}
     Constraints: ${agent.constraints}
@@ -115,7 +138,7 @@ export async function generateArticle({ pitch, agent }) {
     ANGLE: ${pitch.angle}
     CONTEXT: ${pitch.contextLabel}
     DECLARED ANCHORS: ${pitch.concreteAnchors ? pitch.concreteAnchors.join('; ') : 'Use anchors from the angle'}
-
+${researchSection}
     === GLOBAL RULES (MANDATORY) ===
 
     1. CONCRETE ANCHOR REQUIREMENT (STRICT):

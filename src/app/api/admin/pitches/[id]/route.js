@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/db'
 import { requireEditor } from '@/lib/auth'
 import { generateArticle } from '@/lib/ai'
+import { gatherResearch } from '@/lib/research'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,6 +17,37 @@ export async function PATCH(request, { params }) {
 
         let status
         switch (action) {
+            case 'research':
+                // Gather research for this pitch
+                const pitchForResearch = await prisma.pitch.findUnique({
+                    where: { id: pitchId }
+                })
+
+                if (!pitchForResearch) {
+                    return NextResponse.json({ error: 'Pitch not found' }, { status: 404 })
+                }
+
+                // Extract athlete name from title/angle if present
+                const athleteMatch = pitchForResearch.title.match(/(?:^|\s)([A-Z][a-z]+ [A-Z][a-z]+)(?:\s|$|'s|:)/);
+                const athlete = athleteMatch ? athleteMatch[1] : null;
+
+                const research = await gatherResearch({
+                    title: pitchForResearch.title,
+                    angle: pitchForResearch.angle,
+                    athlete: athlete,
+                    topic: pitchForResearch.contextLabel
+                })
+
+                // Store research in editorNotes as JSON
+                await prisma.pitch.update({
+                    where: { id: pitchId },
+                    data: {
+                        editorNotes: JSON.stringify(research)
+                    }
+                })
+
+                return NextResponse.json({ success: true, research })
+
             case 'approve':
                 status = 'APPROVED'
                 break
@@ -58,11 +90,23 @@ export async function PATCH(request, { params }) {
                 where: { id: currentPitch.agentId }
             })
 
+            // Parse stored research if available
+            let research = null;
+            if (currentPitch.editorNotes) {
+                try {
+                    research = JSON.parse(currentPitch.editorNotes);
+                    if (!research.anchors) research = null; // Not valid research format
+                } catch (e) {
+                    // Not JSON, treat as regular notes
+                    research = null;
+                }
+            }
+
             // Run generation but ensure we still create the record
             let aiContent = '<p>Generating draft content...</p>'
             try {
                 if (agent) {
-                    aiContent = await generateArticle({ pitch: currentPitch, agent })
+                    aiContent = await generateArticle({ pitch: currentPitch, agent, research })
                 }
             } catch (err) {
                 console.error('[Pitches API] AI Generation failed, using placeholder:', err)
