@@ -24,23 +24,33 @@ export async function generatePitch({ agent, topic }) {
     
     === GLOBAL RULES (MANDATORY) ===
     
-    CONCRETE ANCHOR REQUIREMENT:
-    You MUST declare a minimum of 3 concrete real-world anchors in this pitch.
+    CONCRETE ANCHOR REQUIREMENT (STRICT):
+    You MUST declare a minimum of 3 concrete situational anchors in this pitch.
     
-    Valid anchors include:
-    - A specific race or competition (with name, date, or location)
-    - A recognisable moment within a race (early pacing decision, mid-race hesitation, late fatigue, tactical choice)
-    - A training block or phase measured in weeks or months
-    - A real decision made under constraint
-    - A comparable athlete or historical example (named)
+    A concrete anchor IS NOT:
+    - Naming a race (e.g. "the Paris Olympics")
+    - Referencing an athlete (e.g. "like Kipchoge")
+    - Stating a background (e.g. "triathlon", "elite level")
+    
+    A concrete anchor MUST INCLUDE:
+    - A SITUATION that unfolds over time
+    - A DECISION, MOMENT, or PHASE with a consequence
+    - Something the reader can paraphrase as: "When X happened, Y followed"
+    
+    Valid anchor examples:
+    - An early-race pacing choice and its downstream effect on the final kilometres
+    - A mid-race hesitation or commitment that changed the outcome
+    - A training block where one capacity was deprioritised for another, with results
+    - A comparable athlete facing a similar transition with different outcomes
     
     INVALID anchors (do NOT use):
-    - "elite racing", "marathon training", "high-level athletes"
-    - Generic references without specifics
-    - Abstract or hypothetical examples
+    - "the 2024 Olympics" (label, not situation)
+    - "elite marathon runners" (category, not situation)
+    - "Kipchoge's approach" (reference, not situation)
+    - Any abstract or hypothetical example
     
-    Anchors must be described in situ, not referenced abstractly.
-    If you cannot name 3 concrete anchors, do not generate this pitch.
+    Each anchor must answer: "What actually happened?"
+    If you cannot express 3 anchors as situation + consequence, do not generate this pitch.
     
     Format output as JSON:
     {
@@ -49,8 +59,10 @@ export async function generatePitch({ agent, topic }) {
         "angle": "Why this story matters / Detailed pitch / Mandatory sections",
         "whyNow": "Timeliness",
         "contextLabel": "Category", // e.g. Analysis, Feature, Opinion
-        "concreteAnchors": ["Anchor 1: specific description", "Anchor 2: specific description", "Anchor 3: specific description"]
+        "concreteAnchors": ["Anchor 1: (situation) → (consequence)", "Anchor 2: (situation) → (consequence)", "Anchor 3: (situation) → (consequence)"]
     }`;
+
+
 
     try {
         const completion = await openai.chat.completions.create({
@@ -106,38 +118,53 @@ export async function generateArticle({ pitch, agent }) {
 
     === GLOBAL RULES (MANDATORY) ===
 
-    1. CONCRETE ANCHOR REQUIREMENT:
-    You MUST use a minimum of 3 concrete real-world anchors throughout the article.
-    Anchors must be described in situ—show them happening, don't just reference them.
-    Use the declared anchors from the pitch, or add additional specific ones.
+    1. CONCRETE ANCHOR REQUIREMENT (STRICT):
+    You MUST use a minimum of 3 concrete SITUATIONAL anchors throughout the article.
     
-    2. DEPTH RULE (NON-NEGOTIABLE):
-    Every article must advance its core idea at least two layers deep:
-    - Layer 1: The insight, pattern, or explanation
-    - Layer 2: Where that insight creates tension, trade-offs, limits, or failure cases
+    A concrete anchor IS NOT:
+    - Naming a race or event (e.g. "the Paris Olympics")
+    - Referencing an athlete without situational detail (e.g. "like Kipchoge")
+    - Stating a category or background (e.g. "triathlon", "elite level")
     
-    DO NOT end at the point where the idea feels neat or resolved.
-    Depth means stress-testing the idea against reality, not expanding it rhetorically.
+    A concrete anchor MUST:
+    - Describe a SITUATION that unfolds over time
+    - Include a DECISION, MOMENT, or PHASE with a CONSEQUENCE
+    - Be expressible as: "When X happened, Y followed"
     
-    3. ENDING REQUIREMENT (STRICT):
+    Show anchors HAPPENING. The reader must be able to answer: "What actually happened?"
+    
+    2. DEPTH RULE — OPERATIONALISED:
+    The article must:
+    - Introduce an insight or pattern
+    - Then FOLLOW IT into at least one place where it creates DIFFICULTY
+    
+    Depth is defined as: cost, loss, risk, trade-off, or contradiction.
+    
+    EXPLAINING complexity is insufficient.
+    The article must EXPERIENCE it — show where the insight breaks, costs something, or creates new problems.
+    Do NOT pad length. Add depth only through consequence.
+    
+    3. ENDING REQUIREMENT (TIGHTENED):
     Your article MUST NOT end by:
     - Summarising the argument
-    - Reaffirming the insight
-    - Offering motivational closure
+    - Affirming or reassuring
+    - Defining what endurance "is"
+    - Offering any form of closure
     
-    Instead, your article MUST end by introducing ONE of:
-    - A cost that remains even if the argument is accepted
-    - A risk introduced by the behaviour described
-    - A tension that is not fully resolvable
-    - An implication that complicates future performance
+    The ending MUST:
+    - Leave the reader with a consequence that is UNRESOLVED
+    - Or introduce a future constraint created by the success described
     
+    If the ending feels complete, the article is not finished.
     Endings should OPEN, not close.
     ${agentTypeRules}
 
     INTERNAL ANCHOR AUDIT (track during drafting, do not include in output):
-    - Anchor 1: [name the first anchor you use]
-    - Anchor 2: [name the second anchor you use]  
-    - Anchor 3: [name the third anchor you use]
+    - Anchor 1: (situation) → (consequence)
+    - Anchor 2: (situation) → (consequence)
+    - Anchor 3: (situation) → (consequence)
+    
+    If anchors cannot be expressed in this form, the article is incomplete.
 
     Format the output as clean HTML (using <h2>, <p> tags). 
     Do not include valid HTML boilerplate (<html>, <body>), just the content.
@@ -227,38 +254,70 @@ Standfirst: ${standfirst}
 Content:
 ${content}
 
-CORE EVALUATION CRITERIA (NON-NEGOTIABLE):
+=== CORE EVALUATION CRITERIA (NON-NEGOTIABLE) ===
 
-1. CONCRETE ANCHORS
-Does the article include at least three concrete real-world anchors?
-Anchors must be specific and described, not gestured at.
-Valid anchors: named race/competition, recognisable race moment (early pacing, mid-race decision, late fatigue), training phase (weeks/months), real decision under constraint, comparable athlete/historical example.
-If fewer than three valid anchors are present → FAIL
+1. ANCHOR VALIDATION (STRICT — NEW STANDARD)
+Are there at least THREE anchors that describe SITUATIONS, not labels?
 
-2. DEPTH TEST
+For EACH anchor, ask: Can it be paraphrased as "When X happened, Y followed"?
+
+INVALID anchors (count as ZERO):
+- Named races or events without situational detail (e.g. "the Paris Olympics")
+- Referenced athletes without describing what they did (e.g. "like Kipchoge")
+- Categories or backgrounds (e.g. "elite triathlon", "marathon training")
+
+VALID anchors must include:
+- A situation that unfolds over time
+- A decision, moment, or phase with a consequence
+- Something the reader can answer: "What actually happened?"
+
+If fewer than THREE situationally-valid anchors are present → FAIL
+
+2. ABSTRACTION FAILURE CHECK (EXPLICIT)
+Perform this test: If ALL abstract language were removed, would the article still contain substance?
+
+Does the article rely on:
+- Conceptual explanation instead of lived situations?
+- General patterns without specific instances?
+- Labels and references instead of described events?
+
+If the article collapses into generalities when abstract language is removed → FAIL
+
+3. DEPTH TEST
 Does the article go at least two layers deep?
-Layer 1: insight or pattern
-Layer 2: trade-offs, limits, risks, or failure cases
-If the article stops once the idea feels neat or explained → FAIL
+- Layer 1: Insight or pattern
+- Layer 2: Where that insight creates difficulty (cost, loss, risk, trade-off, contradiction)
 
-3. GROUNDING VS ABSTRACTION
-Are claims demonstrated through situations, not generalisations?
-Would the argument collapse if abstract language were removed?
-If the article relies primarily on conceptual explanation → FAIL
+The article must EXPERIENCE difficulty, not just EXPLAIN complexity.
+If it stops once the idea feels neat or explained → FAIL
 
-4. ENDING QUALITY
-Does the article avoid summarising or reaffirming its own argument?
-Does the ending introduce: a cost, a risk, an unresolved tension, or a complication for future performance?
-If the ending feels motivational, tidy, or conclusive → FAIL
+4. ENDING RESOLUTION CHECK (STRICT)
+Does the final paragraph:
+- Restate the argument?
+- Broaden into philosophy?
+- Reassure the reader?
+- Define what endurance "is"?
+- Close the question it opened?
+
+If ANY of the above → FAIL (verdict must be REVISE regardless of quality elsewhere)
+
+The ending must leave a consequence UNRESOLVED or introduce a future constraint.
 
 5. TONE & IDENTITY
 Calm, Editorial, Non-motivational, Non-bloggy, Non-explanatory for beginners.
 If the article could plausibly run on a generic sports blog → FAIL
 
-VERDICT OPTIONS (STRICT):
-✅ READY - The article meets Margin standards and may proceed to editor review.
-⚠️ REVISE - The article shows promise but fails one or more core criteria.
-❌ REJECT - The article fundamentally fails to meet Margin's editorial bar.
+=== VERDICT THRESHOLD (STRICT) ===
+
+- DEFAULT to REVISE when uncertain
+- PREFER rejecting borderline abstraction
+- Passing an article that feels "generally right" but lacks lived specificity is a FAILURE of the review process
+- Protect Margin's identity over approving volume
+
+VERDICT OPTIONS:
+✅ READY - The article meets ALL criteria with situational specificity throughout
+⚠️ REVISE - The article shows promise but fails one or more core criteria
+❌ REJECT - The article fundamentally fails to meet Margin's editorial bar
 
 OUTPUT FORMAT (MANDATORY JSON):
 {
@@ -307,37 +366,43 @@ ${content}
 
 === NON-NEGOTIABLE STANDARDS (APPLY ALL) ===
 
-1. CONCRETE ANCHORS (MANDATORY)
-The article must include at least 3 concrete real-world anchors.
+1. CONCRETE ANCHORS — SITUATIONAL (STRICT)
+The article must include at least 3 concrete SITUATIONAL anchors.
 
-Valid anchors:
-- A named race or competition
-- A recognisable moment within a race (early pacing, mid-race decision, late fatigue)
-- A training phase spanning weeks or months
-- A real decision made under constraint
-- A comparable athlete or historical example
+A concrete anchor IS NOT:
+- Naming a race or event (e.g. "the Paris Olympics")
+- Referencing an athlete without situational detail (e.g. "like Kipchoge")
+- Stating a category or background (e.g. "triathlon", "elite level")
 
-If the article lacks sufficient anchors:
-- Add anchors that plausibly fit the argument
+A concrete anchor MUST:
+- Describe a SITUATION that unfolds over time
+- Include a DECISION, MOMENT, or PHASE with a CONSEQUENCE
+- Be expressible as: "When X happened, Y followed"
+
+Each anchor must answer: "What actually happened?"
+
+If the article lacks sufficient situational anchors:
+- Add anchors that show something HAPPENING
 - Do not invent implausible facts
-- Prioritise well-known or representative examples
-- Anchors must be described, not merely referenced
+- Prioritise well-known or representative examples with situational detail
 
-2. DEPTH REQUIREMENT
-The article must advance its core idea at least two layers deep:
-- Layer 1: Explanation of the idea or pattern
-- Layer 2: Trade-offs, limits, risks, or failure cases
+2. DEPTH REQUIREMENT — OPERATIONALISED
+The article must:
+- Introduce an insight or pattern
+- Then FOLLOW IT into at least one place where it creates DIFFICULTY
 
-If the article currently stops at explanation:
-- Add analysis that stress-tests the idea against reality
-- Show where it breaks, costs something, or creates new problems
-- Do NOT pad length—add depth only where necessary
+Depth is defined as: cost, loss, risk, trade-off, or contradiction.
 
-3. ENDING UPGRADE (CRITICAL)
+EXPLAINING complexity is insufficient.
+The article must EXPERIENCE difficulty — show where the insight breaks, costs something, or creates new problems.
+Do NOT pad length. Add depth only through consequence.
+
+3. ENDING UPGRADE (TIGHTENED)
 The article MUST NOT end by:
 - Summarising the argument
-- Reaffirming the insight
-- Offering motivational closure
+- Affirming or reassuring
+- Defining what endurance "is"
+- Offering any form of closure
 
 If the ending is tidy or conclusive, rewrite the final paragraph(s) to introduce:
 - A lingering cost
@@ -345,6 +410,7 @@ If the ending is tidy or conclusive, rewrite the final paragraph(s) to introduce
 - A risk that follows success
 - A complication that future performance must absorb
 
+If the ending feels complete, the article is not finished.
 Endings should OPEN, not close.
 
 4. TONE PRESERVATION
@@ -358,8 +424,8 @@ Do NOT add:
 === INSTRUCTIONS ===
 
 Make minimal, targeted edits to:
-- Insert concrete anchors where ideas are abstract
-- Add one deeper analytical layer
+- Insert SITUATIONAL anchors where ideas are abstract (situation + consequence)
+- Add one deeper analytical layer showing difficulty
 - Replace the ending with an unresolved implication
 
 Do NOT:
