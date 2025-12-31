@@ -9,6 +9,8 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
     const [showPublish, setShowPublish] = useState(false)
     const [reviewResult, setReviewResult] = useState(null)
     const [reviewLoading, setReviewLoading] = useState(false)
+    const [headlines, setHeadlines] = useState(null)
+    const [headlinesLoading, setHeadlinesLoading] = useState(false)
 
     const handleAction = async (action, data = {}) => {
         setLoading(true)
@@ -52,6 +54,28 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
             console.error('Quality review failed:', error)
         } finally {
             setReviewLoading(false)
+        }
+    }
+
+    const handleGenerateHeadlines = async () => {
+        setHeadlinesLoading(true)
+        setHeadlines(null)
+
+        try {
+            const res = await fetch(`/api/admin/drafts/${draftId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'headlines' }),
+            })
+
+            if (res.ok) {
+                const data = await res.json()
+                setHeadlines(data.headlines)
+            }
+        } catch (error) {
+            console.error('Headline generation failed:', error)
+        } finally {
+            setHeadlinesLoading(false)
         }
     }
 
@@ -126,6 +150,13 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
                         {reviewLoading ? 'Reviewing...' : 'Quality Review'}
                     </button>
                     <button
+                        onClick={handleGenerateHeadlines}
+                        className="btn btn-outline"
+                        disabled={headlinesLoading}
+                    >
+                        {headlinesLoading ? 'Generating...' : 'Generate Headlines'}
+                    </button>
+                    <button
                         onClick={() => handleAction('approve')}
                         className="btn btn-primary"
                         disabled={loading}
@@ -143,6 +174,10 @@ export default function DraftActions({ draftId, status, hasArticle, draftData = 
 
                 {reviewResult && (
                     <ReviewResultPanel result={reviewResult} onDismiss={() => setReviewResult(null)} />
+                )}
+
+                {headlines && (
+                    <HeadlinePanel headlines={headlines} onDismiss={() => setHeadlines(null)} />
                 )}
             </>
         )
@@ -242,6 +277,114 @@ function ReviewResultPanel({ result, onDismiss }) {
                 .review-section li {
                     font-size: var(--text-sm);
                     margin-bottom: var(--space-1);
+                }
+            `}</style>
+        </div>
+    )
+}
+
+function HeadlinePanel({ headlines, onDismiss }) {
+    const [copied, setCopied] = useState(null)
+
+    const handleCopy = (headline, index) => {
+        navigator.clipboard.writeText(headline)
+        setCopied(index)
+        setTimeout(() => setCopied(null), 2000)
+    }
+
+    return (
+        <div className="headline-panel">
+            <div className="headline-header">
+                <span className="headline-title">📝 Headline Options</span>
+                <button onClick={onDismiss} className="headline-dismiss">✕</button>
+            </div>
+
+            <p className="headline-note">Ordered by editorial strength. Click to copy.</p>
+
+            <ul className="headline-list">
+                {headlines.map((headline, i) => (
+                    <li
+                        key={i}
+                        onClick={() => handleCopy(headline, i)}
+                        className={`headline-item ${copied === i ? 'copied' : ''}`}
+                    >
+                        {headline}
+                        {copied === i && <span className="copied-badge">Copied</span>}
+                    </li>
+                ))}
+            </ul>
+
+            <style jsx>{`
+                .headline-panel {
+                    margin-top: var(--space-4);
+                    padding: var(--space-4);
+                    background-color: var(--color-bg-elevated);
+                    border: 1px solid var(--color-border-subtle);
+                    border-radius: 6px;
+                }
+                
+                .headline-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: var(--space-2);
+                }
+                
+                .headline-title {
+                    font-weight: 600;
+                    font-size: var(--text-lg);
+                }
+                
+                .headline-dismiss {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    font-size: var(--text-lg);
+                    opacity: 0.6;
+                }
+                
+                .headline-dismiss:hover {
+                    opacity: 1;
+                }
+                
+                .headline-note {
+                    font-size: var(--text-sm);
+                    color: var(--color-text-muted);
+                    margin-bottom: var(--space-3);
+                }
+                
+                .headline-list {
+                    margin: 0;
+                    padding: 0;
+                    list-style: none;
+                }
+                
+                .headline-item {
+                    padding: var(--space-3);
+                    border: 1px solid var(--color-border-subtle);
+                    border-radius: 4px;
+                    margin-bottom: var(--space-2);
+                    cursor: pointer;
+                    transition: background-color 0.15s, border-color 0.15s;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                
+                .headline-item:hover {
+                    background-color: var(--color-bg-alt);
+                    border-color: var(--color-accent);
+                }
+                
+                .headline-item.copied {
+                    background-color: var(--color-success-bg);
+                    border-color: var(--color-success);
+                }
+                
+                .copied-badge {
+                    font-size: var(--text-xs);
+                    color: var(--color-success);
+                    font-weight: 500;
                 }
             `}</style>
         </div>
