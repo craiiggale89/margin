@@ -156,7 +156,21 @@ ${researchSection}
     
     Show anchors HAPPENING. The reader must be able to answer: "What actually happened?"
     
-    2. ANTI-CELEBRATION RULE (CRITICAL):
+    2. INTRODUCTION STRUCTURE (STRICT):
+    Introductions must be stripped back to exactly three elements:
+    - WHAT HAPPENED: A factual statement of the event or outcome
+    - WHY IT'S NOT STRAIGHTFORWARD: The complication, tension, or question that makes this interesting
+    - WHAT QUESTION THE ARTICLE PURSUES: The specific inquiry the reader is being invited into
+    
+    DO NOT include:
+    - General context or background about the sport
+    - Praise or celebration of the achievement
+    - Throat-clearing or scene-setting
+    - Statements of how impressive/remarkable/historic something is
+    
+    Get to the point. The introduction should take no more than 2-3 short paragraphs.
+    
+    3. ANTI-CELEBRATION RULE (CRITICAL):
     Articles must NOT celebrate, praise, validate, or affirm performance outcomes.
     AVOID language that signals approval, success validation, or emotional uplift:
     - "impressive", "remarkable", "sensational", "historic"
@@ -166,7 +180,7 @@ ${researchSection}
     Outcomes may be described FACTUALLY, but never framed as confirmation that a decision was "right".
     Do NOT use phrases like "his bet paid off" or "the risk was rewarded".
     
-    3. RISK MUST SURVIVE SUCCESS:
+    4. RISK MUST SURVIVE SUCCESS:
     Risk must remain present even AFTER successful outcomes.
     Articles MUST explicitly address at least one risk, constraint, or trade-off that PERSISTS or INTENSIFIES because of success.
     Success may change the nature of risk, but it does NOT remove it.
@@ -174,7 +188,7 @@ ${researchSection}
     AVOID: "despite the risks, it worked" or any validation arc.
     REQUIRE: What new problem does the success create? What cost becomes visible only after?
     
-    4. NO BLUEPRINTS, NO TAKEAWAYS:
+    5. NO BLUEPRINTS, NO TAKEAWAYS:
     Articles must NOT present performance pathways as models, templates, or blueprints for others.
     AVOID:
     - "serves as a blueprint for"
@@ -184,7 +198,7 @@ ${researchSection}
     
     Margin analyses situations, NOT instructions. We do not give advice.
     
-    5. DEPTH RULE — OPERATIONALISED:
+    6. DEPTH RULE — OPERATIONALISED:
     The article must:
     - Introduce an insight or pattern
     - Then FOLLOW IT into at least one place where it creates DIFFICULTY
@@ -195,7 +209,7 @@ ${researchSection}
     The article must EXPERIENCE it — show where the insight breaks, costs something, or creates new problems.
     Do NOT pad length. Add depth only through consequence.
     
-    6. COMPLICATING ENDING RULE (STRICT):
+    7. COMPLICATING ENDING RULE (STRICT):
     Articles MUST end by introducing a constraint, cost, or unanswered question that emerges BECAUSE of the outcome described.
     
     Endings MUST NOT:
@@ -452,7 +466,21 @@ If the article lacks sufficient situational anchors:
 - Do not invent implausible facts
 - Prioritise well-known or representative examples with situational detail
 
-2. ANTI-CELEBRATION RULE (CRITICAL)
+2. INTRODUCTION STRUCTURE (STRICT)
+If the introduction is bloated, rewrite it to contain ONLY:
+- WHAT HAPPENED: A factual statement of the event or outcome
+- WHY IT'S NOT STRAIGHTFORWARD: The complication or tension
+- WHAT QUESTION THE ARTICLE PURSUES: The specific inquiry
+
+REMOVE from introductions:
+- General context or background about the sport
+- Praise or celebration of the achievement
+- Throat-clearing or scene-setting
+- Statements of how impressive/remarkable/historic something is
+
+Get to the point. The introduction should take no more than 2-3 short paragraphs.
+
+3. ANTI-CELEBRATION RULE (CRITICAL)
 The upgraded article must NOT celebrate, praise, validate, or affirm performance outcomes.
 REMOVE or REWRITE any language that signals approval or success validation:
 - "impressive", "remarkable", "sensational", "historic"
