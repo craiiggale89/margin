@@ -21,9 +21,13 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
             if (res.ok) {
                 setUpgradedIds(prev => new Set([...prev, articleId]))
                 router.refresh()
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                alert(`Upgrade failed: ${errorData.error || res.statusText}`);
             }
         } catch (error) {
             console.error('Upgrade failed:', error)
+            alert('Upgrade failed: Network error or timeout');
         } finally {
             setUpgradingId(null)
         }
