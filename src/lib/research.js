@@ -1,37 +1,43 @@
 /**
  * Research Agent - Gathers concrete anchors via web search
  * Runs after pitch approval to find real data for article generation
+ * Uses Google Gemini with search grounding
  */
 
-const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 /**
- * Gathers research for an approved pitch using web search
+ * Gathers research for an approved pitch using Gemini with Google Search
  * Returns structured anchors: race moments, decisions, training phases
  */
 export async function gatherResearch({ title, angle, athlete, topic }) {
-    if (!PERPLEXITY_API_KEY) {
-        console.warn('[Research] No PERPLEXITY_API_KEY set, using fallback');
+    if (!GEMINI_API_KEY) {
+        console.warn('[Research] No GEMINI_API_KEY set, using fallback');
         return generateFallbackResearch({ title, angle, athlete, topic });
     }
 
     const searchPrompt = buildSearchPrompt({ title, angle, athlete, topic });
 
     try {
-        const response = await fetch('https://api.perplexity.ai/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${PERPLEXITY_API_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                model: 'llama-3.1-sonar-small-128k-online',
-                messages: [
-                    {
-                        role: 'system',
-                        content: `You are a sports research assistant for Margin, a magazine about endurance performance.
+        // Use Gemini 2.0 Flash with Google Search grounding
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    contents: [{
+                        parts: [{
+                            text: searchPrompt
+                        }]
+                    }],
+                    systemInstruction: {
+                        parts: [{
+                            text: `You are a sports research assistant for Margin, a magazine about endurance performance.
 
-Your task is to find CONCRETE, SPECIFIC anchors for an article. You must return real data, not generalities.
+Your task is to find CONCRETE, SPECIFIC anchors for an article using Google Search. You must return real data, not generalities.
 
 For each anchor, provide:
 - SITUATION: What actually happened (specific moment, phase, or decision)
@@ -51,25 +57,34 @@ Return your findings as JSON in this exact format:
     ],
     "summary": "Brief overview of key findings"
 }`
+                        }]
                     },
-                    {
-                        role: 'user',
-                        content: searchPrompt
+                    tools: [{
+                        googleSearch: {}
+                    }],
+                    generationConfig: {
+                        temperature: 0.2,
+                        maxOutputTokens: 2000,
                     }
-                ],
-                temperature: 0.2,
-                max_tokens: 2000,
-            }),
-        });
+                }),
+            }
+        );
 
         if (!response.ok) {
             const error = await response.text();
-            console.error('[Research] Perplexity API error:', error);
+            console.error('[Research] Gemini API error:', error);
             throw new Error('Research API failed');
         }
 
         const data = await response.json();
-        const content = data.choices[0].message.content;
+
+        // Extract content from Gemini response
+        const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!content) {
+            console.error('[Research] No content in Gemini response');
+            return generateFallbackResearch({ title, angle, athlete, topic });
+        }
 
         // Parse JSON from response
         const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -138,7 +153,7 @@ function generateFallbackResearch({ title, angle, athlete, topic }) {
     return {
         athlete: athlete || 'Unknown',
         anchors: [],
-        summary: 'No research API configured. Please set PERPLEXITY_API_KEY in environment variables.',
+        summary: 'No research API configured. Please set GEMINI_API_KEY in environment variables.',
         fallback: true,
         searchSuggestions: [
             `Search: "${athlete || topic} race results 2024"`,
