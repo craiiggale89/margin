@@ -101,7 +101,8 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
                     defaultValue={article.displayOrder || 0}
                     onBlur={(e) => handleOrderChange(article.id, e.target.value)}
                     disabled={orderingId === article.id}
-                    title="Higher = appears first"
+                    title="Lower = appears first (1, 2, 3...)"
+                    min="0"
                 />
             </span>
             <span className="col-featured">

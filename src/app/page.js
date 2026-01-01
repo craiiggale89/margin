@@ -9,7 +9,7 @@ async function getFeaturedArticle() {
                 hidden: false,
                 featured: true,
             },
-            orderBy: [{ displayOrder: 'desc' }, { publishedAt: 'desc' }],
+            orderBy: [{ displayOrder: 'asc' }, { publishedAt: 'desc' }],
         })
         return article
     } catch {
@@ -25,7 +25,7 @@ async function getRecentArticles() {
                 hidden: false,
                 featured: false,
             },
-            orderBy: [{ displayOrder: 'desc' }, { publishedAt: 'desc' }],
+            orderBy: [{ displayOrder: 'asc' }, { publishedAt: 'desc' }],
             take: 4,
         })
         return articles

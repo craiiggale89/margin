@@ -22,7 +22,7 @@ async function getArticles(filter) {
 
         const articles = await prisma.article.findMany({
             where,
-            orderBy: [{ displayOrder: 'desc' }, { publishedAt: 'desc' }],
+            orderBy: [{ displayOrder: 'asc' }, { publishedAt: 'desc' }],
         })
         return articles
     } catch {
