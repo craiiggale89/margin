@@ -1,6 +1,8 @@
 import prisma from '@/lib/db'
 import HomeContent from '@/components/home/HomeContent'
 
+export const dynamic = 'force-dynamic'
+
 async function getFeaturedArticle() {
     try {
         const article = await prisma.article.findFirst({
