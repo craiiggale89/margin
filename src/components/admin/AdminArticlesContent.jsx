@@ -10,6 +10,7 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
     const [upgradedIds, setUpgradedIds] = useState(new Map())
     const [togglingId, setTogglingId] = useState(null)
     const [orderingId, setOrderingId] = useState(null)
+    const [featuringId, setFeaturingId] = useState(null)
 
     // Separate visible and hidden articles
     const visibleArticles = publishedArticles.filter(a => !a.hidden)
@@ -79,11 +80,36 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
         }
     }
 
+    const handleToggleFeatured = async (articleId, isCurrentlyFeatured) => {
+        setFeaturingId(articleId)
+        try {
+            const res = await fetch(`/api/admin/articles/${articleId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: isCurrentlyFeatured ? 'unfeature' : 'feature' }),
+            })
+            if (res.ok) {
+                router.refresh()
+            }
+        } catch (error) {
+            console.error('Feature toggle failed:', error)
+        } finally {
+            setFeaturingId(null)
+        }
+    }
+
     const ArticleRow = ({ article, isHidden = false }) => (
         <div className={`table-row ${isHidden ? 'row-hidden' : ''}`}>
             <div className="col-title">
                 <div className="title-row">
-                    {article.featured && <span className="featured-badge">★</span>}
+                    <button
+                        className={`star-btn ${article.featured ? 'starred' : ''}`}
+                        onClick={() => handleToggleFeatured(article.id, article.featured)}
+                        disabled={featuringId === article.id}
+                        title={article.featured ? 'Remove from featured' : 'Set as featured'}
+                    >
+                        {featuringId === article.id ? '•' : article.featured ? '★' : '☆'}
+                    </button>
                     <Link href={`/articles/${article.slug}`} target="_blank" className="article-title-link">
                         {article.title}
                     </Link>
@@ -311,9 +337,27 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
           outline: none;
         }
         
-        .featured-badge {
+        .star-btn {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-size: 16px;
+          color: #ccc;
+          padding: 0;
+          line-height: 1;
+        }
+        
+        .star-btn:hover {
           color: #d4a000;
-          font-size: 14px;
+        }
+        
+        .star-btn.starred {
+          color: #d4a000;
+        }
+        
+        .star-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
         
         .col-actions {

@@ -114,6 +114,23 @@ export async function PATCH(request, { params }) {
             return NextResponse.json({ success: true, message: 'Order updated' })
         }
 
+        // Handle feature toggle action
+        if (action === 'feature') {
+            await prisma.article.update({
+                where: { id: params.id },
+                data: { featured: true }
+            })
+            return NextResponse.json({ success: true, message: 'Article featured' })
+        }
+
+        if (action === 'unfeature') {
+            await prisma.article.update({
+                where: { id: params.id },
+                data: { featured: false }
+            })
+            return NextResponse.json({ success: true, message: 'Article unfeatured' })
+        }
+
         // Regular update
         const article = await prisma.article.update({
             where: { id: params.id },
