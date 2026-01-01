@@ -32,6 +32,9 @@ export async function PATCH(request, { params }) {
                 const athleteMatch = pitchForResearch.title.match(/(?:^|\s)([A-Z][a-z]+ [A-Z][a-z]+)(?:\s|$|'s|:)/);
                 const athlete = athleteMatch ? athleteMatch[1] : null;
 
+                // RELEASE DB CONNECTION while waiting for long research task
+                await prisma.$disconnect();
+
                 const research = await gatherResearch({
                     title: pitchForResearch.title,
                     angle: pitchForResearch.angle,
@@ -102,6 +105,9 @@ export async function PATCH(request, { params }) {
                     research = null;
                 }
             }
+
+            // RELEASE DB CONNECTION while waiting for long AI tasks
+            await prisma.$disconnect();
 
             // Run generation but ensure we still create the record
             let aiContent = '<p>Generating draft content...</p>'

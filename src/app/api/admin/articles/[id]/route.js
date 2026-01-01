@@ -35,6 +35,10 @@ export async function PATCH(request, { params }) {
             const athlete = athleteMatch ? athleteMatch[1].trim() : null;
             console.log('[Upgrade] Extracted athlete:', athlete);
 
+            // RELEASE DB CONNECTION while waiting for long AI tasks (~20s)
+            // This prevents "Max clients reached" for other users.
+            await prisma.$disconnect();
+
             const research = await gatherResearch({
                 title: article.title,
                 angle: article.standfirst,
