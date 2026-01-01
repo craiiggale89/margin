@@ -74,6 +74,8 @@ model Article {
   readingTime   Int
   imageUrl      String?
   featured      Boolean   @default(false)
+  hidden        Boolean   @default(false)   // If true, not shown on public site
+  displayOrder  Int       @default(0)       // Higher = appears first (0 = use publishedAt)
   sportFilter   String?   // Cycling, Running, Multi
   draftId       String    @unique
   draft         Draft     @relation(fields: [draftId], references: [id])

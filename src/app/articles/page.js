@@ -13,6 +13,7 @@ async function getArticles(filter) {
     try {
         const where = {
             publishedAt: { not: null },
+            hidden: false,
         }
 
         if (filter && filter !== 'all') {
@@ -21,7 +22,7 @@ async function getArticles(filter) {
 
         const articles = await prisma.article.findMany({
             where,
-            orderBy: { publishedAt: 'desc' },
+            orderBy: [{ displayOrder: 'desc' }, { publishedAt: 'desc' }],
         })
         return articles
     } catch {

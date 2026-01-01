@@ -52,7 +52,7 @@ export async function generateMetadata({ params }) {
 export default async function ArticlePage({ params }) {
     const article = await getArticle(params.slug)
 
-    if (!article || !article.publishedAt) {
+    if (!article || !article.publishedAt || article.hidden) {
         notFound()
     }
 

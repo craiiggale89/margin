@@ -86,6 +86,34 @@ export async function PATCH(request, { params }) {
             })
         }
 
+        // Handle hide action
+        if (action === 'hide') {
+            await prisma.article.update({
+                where: { id: params.id },
+                data: { hidden: true }
+            })
+            return NextResponse.json({ success: true, message: 'Article hidden' })
+        }
+
+        // Handle show action
+        if (action === 'show') {
+            await prisma.article.update({
+                where: { id: params.id },
+                data: { hidden: false }
+            })
+            return NextResponse.json({ success: true, message: 'Article visible' })
+        }
+
+        // Handle reorder action
+        if (action === 'reorder') {
+            const { displayOrder } = body
+            await prisma.article.update({
+                where: { id: params.id },
+                data: { displayOrder: displayOrder || 0 }
+            })
+            return NextResponse.json({ success: true, message: 'Order updated' })
+        }
+
         // Regular update
         const article = await prisma.article.update({
             where: { id: params.id },

@@ -6,9 +6,10 @@ async function getFeaturedArticle() {
         const article = await prisma.article.findFirst({
             where: {
                 publishedAt: { not: null },
-                featured: true, // Assuming one featured article at a time or logic to pick latest
+                hidden: false,
+                featured: true,
             },
-            orderBy: { publishedAt: 'desc' },
+            orderBy: [{ displayOrder: 'desc' }, { publishedAt: 'desc' }],
         })
         return article
     } catch {
@@ -21,9 +22,10 @@ async function getRecentArticles() {
         const articles = await prisma.article.findMany({
             where: {
                 publishedAt: { not: null },
+                hidden: false,
                 featured: false,
             },
-            orderBy: { publishedAt: 'desc' },
+            orderBy: [{ displayOrder: 'desc' }, { publishedAt: 'desc' }],
             take: 4,
         })
         return articles
