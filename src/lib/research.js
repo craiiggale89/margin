@@ -19,9 +19,9 @@ export async function gatherResearch({ title, angle, athlete, topic }) {
     const searchPrompt = buildSearchPrompt({ title, angle, athlete, topic });
 
     try {
-        // Use Gemini 2.0 Flash with Google Search grounding
+        // Use Gemini 1.5 Flash with Google Search grounding
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
             {
                 method: 'POST',
                 headers: {
