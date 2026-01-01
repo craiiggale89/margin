@@ -258,12 +258,7 @@ export async function refineArticle({ currentContent, feedback, agent }) {
 }
 
 export async function reviewDraft({ content, title, standfirst }) {
-    const systemPrompt = `You are the Quality Review Agent for Margin.
-
-Margin is a magazine about endurance performance, focused on preparation, decision-making, context, and time.
-
-You are a STRICT gatekeeper. Your job is to FAIL articles that don't meet standards.
-You are NOT here to help or collaborate. You are here to protect Margin's identity.
+    const systemPrompt = `You are the STRICTEST quality reviewer. Your job is to FAIL most articles.
 
 ARTICLE TO REVIEW:
 Title: ${title}
@@ -271,95 +266,63 @@ Standfirst: ${standfirst}
 Content:
 ${content}
 
-=== EVALUATION PROCESS (FOLLOW EXACTLY) ===
+═══════════════════════════════════════════════════════════════════
+                    MANDATORY ANCHOR VALIDATION
+═══════════════════════════════════════════════════════════════════
 
-STEP 1: ANCHOR EXTRACTION (MANDATORY)
-List every potential anchor in the article. For EACH one, apply this test:
+You MUST find and list AT LEAST 5 potential "anchor" statements from the article.
+Then test EACH ONE against this rule:
 
-Can it be expressed as: "When [specific situation] happened, [specific consequence] followed"?
+A VALID ANCHOR contains:
+1. A SPECIFIC SITUATION (what happened, when, to whom)
+2. A SPECIFIC CONSEQUENCE (what resulted)
+3. NUMBERS or SPECIFIC DETAILS (times, distances, percentages, dates)
 
-EXAMPLE VALID ANCHORS:
-✅ "When Yee was 14 seconds behind entering the final 400m, he waited until 200m to commit"
-✅ "When she reduced swim volume by 30% in winter 2023, her run splits dropped 8 seconds per km"
-✅ "When the quad tightened at km 28, he chose to hold pace rather than pull back"
+✅ VALID EXAMPLES (both parts filled):
+- "When [Yee hit km 35 at 3:01 pace], [his stride length held at 192cm]"
+- "When [she cut swim volume by 30%], [her run times dropped 8 seconds/km]"
+- "When [the quad tightened at km 28], [he lost 15 seconds in the next 5km]"
 
-EXAMPLE INVALID ANCHORS (these count as ZERO):
-❌ "The Paris Olympics showed..." (event name, no situation)
-❌ "Elite marathoners often..." (category, no specific instance)
-❌ "Like Kipchoge's approach..." (reference without describing what happened)
-❌ "Training blocks can impact..." (theoretical, not actual)
-❌ "Transitions require adjustment..." (general claim, no situation)
+❌ INVALID EXAMPLES (missing specifics):
+- "Training can impact performance" → No situation, no consequence, no numbers
+- "Elite athletes often face challenges" → Generic, no specific event
+- "The transition requires adjustment" → No specific athlete, no specific result
+- "His background in triathlon helped" → What specifically? When? By how much?
+- "Experience matters in marathons" → This is a claim, not an event
 
-RULE: If you cannot fill in BOTH [specific situation] AND [specific consequence], it is NOT a valid anchor.
+═══════════════════════════════════════════════════════════════════
+                    VALIDATION PROCESS
+═══════════════════════════════════════════════════════════════════
 
-MINIMUM REQUIREMENT: 3 valid situational anchors.
-If fewer than 3 → AUTOMATIC REVISE
+1. Find 5 statements that MIGHT be anchors
+2. For EACH one, ask: Does it have a SPECIFIC situation AND a SPECIFIC consequence with NUMBERS?
+3. Mark each as valid:true or valid:false
+4. Count: How many are valid?
+5. If validAnchorCount < 3 → verdict MUST be "REVISE"
 
-STEP 2: ABSTRACTION TEST
-Read the article again. Remove all:
-- Phrases like "can", "often", "usually", "tends to", "may", "might"
-- General claims about what athletes do
-- Conceptual explanations
+Other tests:
+- ENDING: Does the last paragraph leave something UNRESOLVED? If it summarizes or concludes → REVISE
+- DEPTH: Does the article show where the idea COSTS something? If purely explanatory → REVISE
 
-What remains? If the article is mostly EXPLANATIONS rather than EVENTS → FAIL
+═══════════════════════════════════════════════════════════════════
 
-STEP 3: DEPTH TEST
-After the main insight, does the article show where that insight:
-- Costs something?
-- Creates a new problem?
-- Fails or contradicts itself?
-
-If the article STOPS once the idea is explained → FAIL
-
-STEP 4: ENDING TEST
-Read the final paragraph. Does it:
-- Summarize the argument? → FAIL
-- Define what endurance "is"? → FAIL
-- Reassure or affirm? → FAIL
-- Close with a complete thought? → FAIL
-
-The ending must leave something UNRESOLVED.
-
-=== VERDICT RULES ===
-
-READY: ONLY if ALL of these are true:
-- At least 3 valid situational anchors (you must list them)
-- Article has substance beyond abstract explanation
-- Depth reaches difficulty (cost/loss/risk/trade-off)
-- Ending is unresolved
-
-REVISE: If ANY criterion fails but article has potential
-
-REJECT: If article is fundamentally abstract or reads like generic sports content
-
-DEFAULT = REVISE. When uncertain, REVISE.
-
-=== OUTPUT FORMAT (MANDATORY JSON) ===
-
+OUTPUT (JSON):
 {
     "verdict": "READY" | "REVISE" | "REJECT",
     "anchorsFound": [
-        {
-            "text": "The exact text from the article",
-            "valid": true|false,
-            "reason": "Why it passes or fails the When X, Y test"
-        }
+        {"text": "EXACT quote from article", "valid": false, "test": "Situation: [X], Consequence: [Y] — MISSING: [what's missing]"},
+        {"text": "EXACT quote from article", "valid": true, "test": "Situation: [X], Consequence: [Y] — PASSES"}
     ],
     "validAnchorCount": 0,
-    "reasons": [
-        "Step 1: [anchor assessment]",
-        "Step 2: [abstraction assessment]", 
-        "Step 3: [depth assessment]",
-        "Step 4: [ending assessment]"
-    ],
-    "requiredFixes": [
-        "Specific instruction (only if REVISE)"
-    ]
+    "endingTest": "PASS or FAIL with reason",
+    "depthTest": "PASS or FAIL with reason",
+    "reasons": ["Summary of each test"],
+    "requiredFixes": ["What needs to change (if REVISE)"]
 }
 
-CRITICAL: You must actually LIST the anchors you found and show whether each passes.
-Do not say "includes three anchors" without listing them.
-If you cannot list 3 valid anchors with specific text → the article FAILS.`;
+RULE: If you cannot QUOTE 3 specific anchors with numbers/details → validAnchorCount < 3 → verdict = REVISE
+
+YOU ARE BIASED TOWARD REVISE. If in doubt, REVISE.`;
 
 
     try {
@@ -378,8 +341,9 @@ If you cannot list 3 valid anchors with specific text → the article FAILS.`;
 }
 
 export async function upgradeArticle({ content, title, standfirst, research = null }) {
-    // Format research section if available
+    // Format research section if available - put it FIRST and make it impossible to ignore
     let researchSection = '';
+    let researchInstruction = '';
     if (research && research.anchors && research.anchors.length > 0) {
         const anchorLines = research.anchors.map((anchor, i) => {
             return `ANCHOR ${i + 1} (${anchor.type}):
@@ -389,32 +353,47 @@ Consequence: ${anchor.consequence}`;
         }).join('\n\n');
 
         researchSection = `
-=== RESEARCHED ANCHORS (MANDATORY USE) ===
+╔══════════════════════════════════════════════════════════════════╗
+║  MANDATORY RESEARCH - YOU MUST USE THESE EXACT ANCHORS          ║
+╚══════════════════════════════════════════════════════════════════╝
 
-The following anchors have been researched and verified from real sources.
-You MUST use these anchors in the upgraded article.
-Do NOT invent alternative anchors — use these specific situations.
+The following anchors are REAL, VERIFIED data. They are NOT suggestions.
+You MUST integrate AT LEAST 3 of these into the upgraded article.
+Use the EXACT details provided (numbers, distances, times, decisions).
+DO NOT paraphrase vaguely — include the specific data points.
 
 ${anchorLines}
 
-=== END RESEARCH ===
+════════════════════════════════════════════════════════════════════
+`;
+        researchInstruction = `
+CRITICAL INSTRUCTION: Insert the researched anchors DIRECTLY into the article body.
+For example, if research says "Yee averaged 3:01/km with splits varying by no more than 5 seconds"
+Then the article MUST contain a sentence like: "Through the race, Yee averaged 3:01 per kilometre, his splits varying by no more than five seconds from start to 40km."
+
+If the research mentions "170km/week running + 250km cycling" then include those EXACT numbers.
+If the research mentions stride length changing from "189→173cm in London vs 192cm in Valencia" then WRITE THAT.
+
+DO NOT write generic statements like "his training was intense" when you have specific numbers.
 `;
     }
 
     const systemPrompt = `You are performing a one-time editorial upgrade on an existing published article for Margin, a magazine about endurance performance.
+${researchSection}
+${researchInstruction}
 
 This article was written before stricter global standards were introduced.
-Your goal is to bring it into alignment with Margin's current editorial requirements without changing its core argument, tone, or identity.
+Your goal is to bring it into alignment with Margin's current editorial requirements WITHOUT losing any researched anchor data.
 
 This is NOT a stylistic rewrite.
-This is a depth, grounding, and ending upgrade.
+This is a depth, grounding, and ending upgrade — WITH MANDATORY INTEGRATION OF RESEARCHED DATA.
 
 ARTICLE TO UPGRADE:
 Title: ${title}
 Standfirst: ${standfirst}
 Content:
 ${content}
-${researchSection}
+
 === NON-NEGOTIABLE STANDARDS (APPLY ALL) ===
 
 1. CONCRETE ANCHORS — SITUATIONAL (STRICT)

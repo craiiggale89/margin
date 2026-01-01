@@ -29,6 +29,7 @@ export async function PATCH(request, { params }) {
             // Run Research Agent first to gather concrete anchors
             const athleteMatch = article.title.match(/(?:^|\s)([A-Z][a-z]+ [A-Z][a-z]+)(?:\s|$|'s|:)/);
             const athlete = athleteMatch ? athleteMatch[1] : null;
+            console.log('[Upgrade] Extracted athlete:', athlete);
 
             const research = await gatherResearch({
                 title: article.title,
@@ -36,6 +37,7 @@ export async function PATCH(request, { params }) {
                 athlete: athlete,
                 topic: article.contextLabel
             })
+            console.log('[Upgrade] Research result:', JSON.stringify(research, null, 2));
 
             // Upgrade with research injected
             const upgradedContent = await upgradeArticle({
