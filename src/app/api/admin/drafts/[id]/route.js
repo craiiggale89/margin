@@ -4,6 +4,7 @@ import { requireEditor } from '@/lib/auth'
 import { refineArticle, reviewDraft, generateHeadlines } from '@/lib/ai'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60; // 60 seconds timeout for AI review and refinement
 
 export async function PATCH(request, { params }) {
     console.log(`[Drafts API] PATCH request for ${params.id}`);

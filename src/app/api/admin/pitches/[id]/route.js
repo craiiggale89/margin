@@ -5,6 +5,7 @@ import { generateArticle } from '@/lib/ai'
 import { gatherResearch } from '@/lib/research'
 
 export const dynamic = 'force-dynamic'
+export const maxDuration = 60; // 60 seconds timeout for AI generation and research
 
 export async function PATCH(request, { params }) {
     console.log(`[Pitches API] PATCH request for ${params.id}`);

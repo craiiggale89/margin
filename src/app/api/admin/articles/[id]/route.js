@@ -5,6 +5,8 @@ import { NextResponse } from 'next/server'
 import { upgradeArticle } from '@/lib/ai'
 import { gatherResearch } from '@/lib/research'
 
+export const maxDuration = 60; // 60 seconds timeout for AI research and upgrade tasks
+
 export async function PATCH(request, { params }) {
     try {
         const session = await getServerSession(authOptions)
