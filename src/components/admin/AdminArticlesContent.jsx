@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 export default function AdminArticlesContent({ articles, publishedArticles, scheduledArticles }) {
     const router = useRouter()
     const [upgradingId, setUpgradingId] = useState(null)
-    const [upgradedIds, setUpgradedIds] = useState(new Set())
+    const [upgradedIds, setUpgradedIds] = useState(new Map()) // Map of articleId -> draftId
 
     const handleUpgrade = async (articleId) => {
         setUpgradingId(articleId)
@@ -19,7 +19,12 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
             })
 
             if (res.ok) {
-                setUpgradedIds(prev => new Set([...prev, articleId]))
+                const data = await res.json();
+                setUpgradedIds(prev => {
+                    const next = new Map(prev);
+                    next.set(articleId, data.draftId);
+                    return next;
+                });
                 router.refresh()
             } else {
                 const errorData = await res.json().catch(() => ({}));
@@ -72,13 +77,22 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
                                     {article.featured && <span className="featured-badge">★</span>}
                                 </span>
                                 <div className="col-actions">
-                                    <button
-                                        onClick={() => handleUpgrade(article.id)}
-                                        disabled={upgradingId === article.id || upgradedIds.has(article.id)}
-                                        className={`btn btn-outline btn-sm ${upgradedIds.has(article.id) ? 'btn-success' : ''}`}
-                                    >
-                                        {upgradingId === article.id ? 'Upgrading...' : upgradedIds.has(article.id) ? '✓ Draft Created' : 'Upgrade'}
-                                    </button>
+                                    {upgradedIds.has(article.id) ? (
+                                        <Link
+                                            href={`/admin/drafts/${upgradedIds.get(article.id)}`}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            View Draft
+                                        </Link>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleUpgrade(article.id)}
+                                            disabled={upgradingId === article.id}
+                                            className="btn btn-outline btn-sm"
+                                        >
+                                            {upgradingId === article.id ? 'Upgrading...' : 'Upgrade'}
+                                        </button>
+                                    )}
                                     <Link href={`/admin/articles/${article.id}`} className="btn btn-ghost btn-sm">
                                         Edit
                                     </Link>

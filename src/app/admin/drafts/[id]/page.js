@@ -16,8 +16,9 @@ async function getDraft(id) {
             },
         })
         return draft
-    } catch {
-        return null
+    } catch (error) {
+        console.error(`[Draft Page] Error fetching draft ${id}:`, error);
+        throw error; // Let Next.js show an error page instead of a 404
     }
 }
 
