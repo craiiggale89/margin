@@ -49,15 +49,26 @@ export async function PATCH(request, { params }) {
                 research: research
             })
 
+            // Build editor notes based on research status
+            let editorNotes = '';
+            if (research.fallback) {
+                editorNotes = '⚠️ RESEARCH FAILED - Upgrade applied WITHOUT verified anchors. Review carefully for missing concrete data.';
+            } else if (research.anchors?.length > 0) {
+                const anchorSummaries = research.anchors.slice(0, 3).map(a =>
+                    `• ${a.type}: ${a.situation?.substring(0, 80)}...`
+                ).join('\n');
+                editorNotes = `✅ ${research.anchors.length} ANCHORS FOUND:\n${anchorSummaries}`;
+            } else {
+                editorNotes = '⚠️ No anchors found by research. Upgrade applied with existing content only.';
+            }
+
             // Update the linked draft with upgraded content for review
             await prisma.draft.update({
                 where: { id: article.draftId },
                 data: {
                     content: upgradedContent,
                     status: 'SUBMITTED',
-                    editorNotes: research.anchors?.length > 0
-                        ? `Quality upgrade with ${research.anchors.length} researched anchors - awaiting review`
-                        : 'Quality upgrade applied - awaiting review'
+                    editorNotes: editorNotes
                 }
             })
 
