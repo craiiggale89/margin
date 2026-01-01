@@ -27,8 +27,10 @@ export async function PATCH(request, { params }) {
             }
 
             // Run Research Agent first to gather concrete anchors
-            const athleteMatch = article.title.match(/(?:^|\s)([A-Z][a-z]+ [A-Z][a-z]+)(?:\s|$|'s|:)/);
-            const athlete = athleteMatch ? athleteMatch[1] : null;
+            // Extract athlete name - skip common title words
+            const titleWithoutCommon = article.title.replace(/^(Unpacking|Inside|Beyond|Exploring|Rethinking|The|A)\s+/gi, '');
+            const athleteMatch = titleWithoutCommon.match(/([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)(?:'s|\s|$|:)/);
+            const athlete = athleteMatch ? athleteMatch[1].trim() : null;
             console.log('[Upgrade] Extracted athlete:', athlete);
 
             const research = await gatherResearch({
