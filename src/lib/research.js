@@ -77,6 +77,7 @@ Return your findings as JSON in this exact format:
         }
 
         const data = await response.json();
+        console.log('[Research] Raw response parts:', JSON.stringify(data.candidates?.[0]?.content?.parts, null, 2)?.substring(0, 500));
 
         // Extract content from Gemini response
         const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -86,10 +87,16 @@ Return your findings as JSON in this exact format:
             return generateFallbackResearch({ title, angle, athlete, topic });
         }
 
+        console.log('[Research] Content received (first 300 chars):', content.substring(0, 300));
+
         // Parse JSON from response
         const jsonMatch = content.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-            return JSON.parse(jsonMatch[0]);
+            try {
+                return JSON.parse(jsonMatch[0]);
+            } catch (e) {
+                console.error('[Research] JSON parse failed:', e.message);
+            }
         }
 
         // If no JSON found, return as summary
