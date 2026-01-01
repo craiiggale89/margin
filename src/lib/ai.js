@@ -372,7 +372,30 @@ If an article weakens Margin's voice, recommend REJECT.`;
     }
 }
 
-export async function upgradeArticle({ content, title, standfirst }) {
+export async function upgradeArticle({ content, title, standfirst, research = null }) {
+    // Format research section if available
+    let researchSection = '';
+    if (research && research.anchors && research.anchors.length > 0) {
+        const anchorLines = research.anchors.map((anchor, i) => {
+            return `ANCHOR ${i + 1} (${anchor.type}):
+Event: ${anchor.event || 'N/A'}
+Situation: ${anchor.situation}
+Consequence: ${anchor.consequence}`;
+        }).join('\n\n');
+
+        researchSection = `
+=== RESEARCHED ANCHORS (MANDATORY USE) ===
+
+The following anchors have been researched and verified from real sources.
+You MUST use these anchors in the upgraded article.
+Do NOT invent alternative anchors — use these specific situations.
+
+${anchorLines}
+
+=== END RESEARCH ===
+`;
+    }
+
     const systemPrompt = `You are performing a one-time editorial upgrade on an existing published article for Margin, a magazine about endurance performance.
 
 This article was written before stricter global standards were introduced.
@@ -386,11 +409,12 @@ Title: ${title}
 Standfirst: ${standfirst}
 Content:
 ${content}
-
+${researchSection}
 === NON-NEGOTIABLE STANDARDS (APPLY ALL) ===
 
 1. CONCRETE ANCHORS — SITUATIONAL (STRICT)
 The article must include at least 3 concrete SITUATIONAL anchors.
+${research?.anchors?.length > 0 ? 'USE THE RESEARCHED ANCHORS PROVIDED ABOVE.' : ''}
 
 A concrete anchor IS NOT:
 - Naming a race or event (e.g. "the Paris Olympics")
@@ -405,7 +429,7 @@ A concrete anchor MUST:
 Each anchor must answer: "What actually happened?"
 
 If the article lacks sufficient situational anchors:
-- Add anchors that show something HAPPENING
+- ${research?.anchors?.length > 0 ? 'Use the researched anchors provided above' : 'Add anchors that show something HAPPENING'}
 - Do not invent implausible facts
 - Prioritise well-known or representative examples with situational detail
 
