@@ -64,7 +64,7 @@ Return your findings as JSON in this exact format:
                     }],
                     generationConfig: {
                         temperature: 0.2,
-                        maxOutputTokens: 2000,
+                        maxOutputTokens: 8000,
                     }
                 }),
             }
@@ -89,13 +89,36 @@ Return your findings as JSON in this exact format:
 
         console.log('[Research] Content received (first 300 chars):', content.substring(0, 300));
 
+        // Remove markdown code blocks if present
+        let jsonContent = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
         // Parse JSON from response
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        const jsonMatch = jsonContent.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             try {
                 return JSON.parse(jsonMatch[0]);
             } catch (e) {
-                console.error('[Research] JSON parse failed:', e.message);
+                console.error('[Research] JSON parse failed, attempting recovery:', e.message);
+                // Try to recover truncated JSON by closing open brackets
+                let truncated = jsonMatch[0];
+                // Remove trailing incomplete content
+                truncated = truncated.replace(/,\s*"[^"]*$/, ''); // Remove incomplete key
+                truncated = truncated.replace(/,\s*$/, ''); // Remove trailing comma
+                // Count and close open brackets
+                const openBraces = (truncated.match(/\{/g) || []).length;
+                const closeBraces = (truncated.match(/\}/g) || []).length;
+                const openBrackets = (truncated.match(/\[/g) || []).length;
+                const closeBrackets = (truncated.match(/\]/g) || []).length;
+                for (let i = 0; i < openBrackets - closeBrackets; i++) truncated += ']';
+                for (let i = 0; i < openBraces - closeBraces; i++) truncated += '}';
+
+                try {
+                    const recovered = JSON.parse(truncated);
+                    console.log('[Research] Recovery successful, anchors:', recovered.anchors?.length || 0);
+                    return recovered;
+                } catch (e2) {
+                    console.error('[Research] Recovery also failed');
+                }
             }
         }
 
