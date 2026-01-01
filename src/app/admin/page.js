@@ -22,8 +22,8 @@ async function getDashboardStats() {
 
     return { pendingPitches, draftsInReview, publishedArticles, recentArticles, agents, newsTopics }
   } catch (error) {
-    console.error(error)
-    return { pendingPitches: 0, draftsInReview: 0, publishedArticles: 0, recentArticles: [], agents: [], newsTopics: {} }
+    console.error('[Dashboard] Stats fetch error:', error)
+    throw error; // Let Next.js show the error boundary
   }
 }
 

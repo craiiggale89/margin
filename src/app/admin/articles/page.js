@@ -7,8 +7,9 @@ async function getArticles() {
             orderBy: { createdAt: 'desc' },
         })
         return articles
-    } catch {
-        return []
+    } catch (error) {
+        console.error('[Articles Page] Fetch error:', error);
+        throw error;
     }
 }
 
