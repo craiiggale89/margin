@@ -539,7 +539,7 @@ The output should be ready to publish immediately.`;
     try {
         const completion = await openai.chat.completions.create({
             messages: [{ role: "system", content: systemPrompt }],
-            model: "gpt-3.5-turbo",
+            model: "gpt-4-turbo",
         });
 
         return completion.choices[0].message.content;
