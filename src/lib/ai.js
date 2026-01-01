@@ -156,7 +156,35 @@ ${researchSection}
     
     Show anchors HAPPENING. The reader must be able to answer: "What actually happened?"
     
-    2. DEPTH RULE — OPERATIONALISED:
+    2. ANTI-CELEBRATION RULE (CRITICAL):
+    Articles must NOT celebrate, praise, validate, or affirm performance outcomes.
+    AVOID language that signals approval, success validation, or emotional uplift:
+    - "impressive", "remarkable", "sensational", "historic"
+    - "hailed", "paid off", "proved", "justified"
+    - "testament to", "reward for", "validation of"
+    
+    Outcomes may be described FACTUALLY, but never framed as confirmation that a decision was "right".
+    Do NOT use phrases like "his bet paid off" or "the risk was rewarded".
+    
+    3. RISK MUST SURVIVE SUCCESS:
+    Risk must remain present even AFTER successful outcomes.
+    Articles MUST explicitly address at least one risk, constraint, or trade-off that PERSISTS or INTENSIFIES because of success.
+    Success may change the nature of risk, but it does NOT remove it.
+    
+    AVOID: "despite the risks, it worked" or any validation arc.
+    REQUIRE: What new problem does the success create? What cost becomes visible only after?
+    
+    4. NO BLUEPRINTS, NO TAKEAWAYS:
+    Articles must NOT present performance pathways as models, templates, or blueprints for others.
+    AVOID:
+    - "serves as a blueprint for"
+    - "underscores the importance of"
+    - "demonstrates principles others could apply"
+    - Generalised lessons or implied prescriptions
+    
+    Margin analyses situations, NOT instructions. We do not give advice.
+    
+    5. DEPTH RULE — OPERATIONALISED:
     The article must:
     - Introduce an insight or pattern
     - Then FOLLOW IT into at least one place where it creates DIFFICULTY
@@ -167,17 +195,16 @@ ${researchSection}
     The article must EXPERIENCE it — show where the insight breaks, costs something, or creates new problems.
     Do NOT pad length. Add depth only through consequence.
     
-    3. ENDING REQUIREMENT (TIGHTENED):
-    Your article MUST NOT end by:
-    - Summarising the argument
-    - Affirming or reassuring
-    - Defining what endurance "is"
-    - Offering any form of closure
+    6. COMPLICATING ENDING RULE (STRICT):
+    Articles MUST end by introducing a constraint, cost, or unanswered question that emerges BECAUSE of the outcome described.
     
-    The ending MUST:
-    - Leave the reader with a consequence that is UNRESOLVED
-    - Or introduce a future constraint created by the success described
+    Endings MUST NOT:
+    - Summarise the argument
+    - Resolve or conclude
+    - Inspire or affirm
+    - Reaffirm what was already said
     
+    The final paragraph must leave the reader with a PROBLEM, not a conclusion.
     If the ending feels complete, the article is not finished.
     Endings should OPEN, not close.
     ${agentTypeRules}
@@ -303,6 +330,9 @@ A VALID ANCHOR contains:
 Other tests:
 - ENDING: Does the last paragraph leave something UNRESOLVED? If it summarizes or concludes → REVISE
 - DEPTH: Does the article show where the idea COSTS something? If purely explanatory → REVISE
+- CELEBRATION: Does the article contain celebratory/validating language? ("impressive", "remarkable", "paid off", "hailed", "testament to", "triumph") → REVISE
+- BLUEPRINT: Does the article present pathways as models or lessons for others? ("blueprint for", "underscores the importance", "demonstrates principles") → REVISE
+- RISK: Does risk survive success? Or does the article validate that "it worked"? If risk disappears after success → REVISE
 
 ═══════════════════════════════════════════════════════════════════
 
@@ -316,11 +346,16 @@ OUTPUT (JSON):
     "validAnchorCount": 0,
     "endingTest": "PASS or FAIL with reason",
     "depthTest": "PASS or FAIL with reason",
+    "celebrationTest": "PASS or FAIL — list any forbidden words found",
+    "blueprintTest": "PASS or FAIL — list any blueprint phrases found",
+    "riskTest": "PASS or FAIL — does risk persist after success?",
     "reasons": ["Summary of each test"],
     "requiredFixes": ["What needs to change (if REVISE)"]
 }
 
 RULE: If you cannot QUOTE 3 specific anchors with numbers/details → validAnchorCount < 3 → verdict = REVISE
+RULE: If ANY forbidden celebration words are found → verdict = REVISE
+RULE: If ANY blueprint phrases are found → verdict = REVISE
 
 YOU ARE BIASED TOWARD REVISE. If in doubt, REVISE.`;
 
@@ -417,7 +452,34 @@ If the article lacks sufficient situational anchors:
 - Do not invent implausible facts
 - Prioritise well-known or representative examples with situational detail
 
-2. DEPTH REQUIREMENT — OPERATIONALISED
+2. ANTI-CELEBRATION RULE (CRITICAL)
+The upgraded article must NOT celebrate, praise, validate, or affirm performance outcomes.
+REMOVE or REWRITE any language that signals approval or success validation:
+- "impressive", "remarkable", "sensational", "historic"
+- "hailed", "paid off", "proved", "justified"
+- "testament to", "reward for", "validation of"
+
+Outcomes may be described FACTUALLY, but never framed as confirmation that a decision was "right".
+If you see "his bet paid off" or "the risk was rewarded" — REMOVE IT.
+
+3. RISK MUST SURVIVE SUCCESS
+Risk must remain present even AFTER successful outcomes.
+The upgraded article MUST explicitly address at least one risk, constraint, or trade-off that PERSISTS or INTENSIFIES because of success.
+
+REMOVE: "despite the risks, it worked" or any validation arc.
+ADD: What new problem does the success create? What cost becomes visible only after?
+
+4. NO BLUEPRINTS, NO TAKEAWAYS
+The upgraded article must NOT present performance pathways as models, templates, or blueprints for others.
+REMOVE:
+- "serves as a blueprint for"
+- "underscores the importance of"
+- "demonstrates principles others could apply"
+- Any generalised lessons or implied prescriptions
+
+Margin analyses situations, NOT instructions.
+
+5. DEPTH REQUIREMENT — OPERATIONALISED
 The article must:
 - Introduce an insight or pattern
 - Then FOLLOW IT into at least one place where it creates DIFFICULTY
@@ -428,14 +490,17 @@ EXPLAINING complexity is insufficient.
 The article must EXPERIENCE difficulty — show where the insight breaks, costs something, or creates new problems.
 Do NOT pad length. Add depth only through consequence.
 
-3. ENDING UPGRADE (TIGHTENED)
+6. COMPLICATING ENDING (STRICT)
+The article MUST end by introducing a constraint, cost, or unanswered question that emerges BECAUSE of the outcome described.
+
 The article MUST NOT end by:
 - Summarising the argument
 - Affirming or reassuring
 - Defining what endurance "is"
-- Offering any form of closure
+- Offering any form of closure or inspiration
 
-If the ending is tidy or conclusive, rewrite the final paragraph(s) to introduce:
+The final paragraph must leave the reader with a PROBLEM, not a conclusion.
+If the ending is tidy or conclusive, rewrite it to introduce:
 - A lingering cost
 - An unresolved tension
 - A risk that follows success
@@ -444,19 +509,22 @@ If the ending is tidy or conclusive, rewrite the final paragraph(s) to introduce
 If the ending feels complete, the article is not finished.
 Endings should OPEN, not close.
 
-4. TONE PRESERVATION
+7. TONE PRESERVATION
 Maintain Margin's voice: calm, editorial, non-motivational, non-instructional, non-bloggy.
 
 Do NOT add:
 - Advice or prescriptions
 - Coaching language
 - Hype or enthusiasm
+- Inspirational language
+- Words like "journey", "triumph", "remarkable", "proves"
 
 === INSTRUCTIONS ===
 
 Make minimal, targeted edits to:
 - Insert SITUATIONAL anchors where ideas are abstract (situation + consequence)
-- Add one deeper analytical layer showing difficulty
+- REMOVE celebratory or validating language
+- ADD a risk or cost that persists after success
 - Replace the ending with an unresolved implication
 
 Do NOT:
