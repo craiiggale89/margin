@@ -82,55 +82,49 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
     const ArticleRow = ({ article, isHidden = false }) => (
         <div className={`table-row ${isHidden ? 'row-hidden' : ''}`}>
             <div className="col-title">
-                <Link href={`/articles/${article.slug}`} target="_blank" className="article-title-link">
-                    {article.title}
-                </Link>
+                <div className="title-row">
+                    {article.featured && <span className="featured-badge">★</span>}
+                    <Link href={`/articles/${article.slug}`} target="_blank" className="article-title-link">
+                        {article.title}
+                    </Link>
+                </div>
                 {article.contextLabel && (
                     <span className="context-label">{article.contextLabel}</span>
                 )}
             </div>
-            <span className="col-date text-muted">
+            <span className="col-date">
                 {new Date(article.publishedAt).toLocaleDateString('en-GB', {
-                    day: 'numeric', month: 'short', year: 'numeric'
+                    day: 'numeric', month: 'short'
                 })}
             </span>
-            <span className="col-order">
-                <input
-                    type="number"
-                    className="order-input"
-                    defaultValue={article.displayOrder || 0}
-                    onBlur={(e) => handleOrderChange(article.id, e.target.value)}
-                    disabled={orderingId === article.id}
-                    title="Lower = appears first (1, 2, 3...)"
-                    min="0"
-                />
-            </span>
-            <span className="col-featured">
-                {article.featured && <span className="featured-badge">★</span>}
-            </span>
+            <input
+                type="number"
+                className="order-input"
+                defaultValue={article.displayOrder || 0}
+                onBlur={(e) => handleOrderChange(article.id, e.target.value)}
+                disabled={orderingId === article.id}
+                title="Lower = appears first"
+                min="0"
+            />
             <div className="col-actions">
                 <button
                     onClick={() => handleToggleVisibility(article.id, isHidden)}
                     disabled={togglingId === article.id}
-                    className={`btn btn-sm ${isHidden ? 'btn-outline' : 'btn-danger-outline'}`}
+                    className={`action-btn ${isHidden ? 'action-show' : 'action-hide'}`}
+                    title={isHidden ? 'Show on site' : 'Hide from site'}
                 >
-                    {togglingId === article.id ? '...' : isHidden ? 'Show' : 'Hide'}
+                    {togglingId === article.id ? '•••' : isHidden ? '👁' : '🙈'}
                 </button>
-                {upgradedIds.has(article.id) ? (
-                    <Link href={`/admin/drafts/${upgradedIds.get(article.id)}`} className="btn btn-success btn-sm">
-                        View Draft
-                    </Link>
-                ) : (
-                    <button
-                        onClick={() => handleUpgrade(article.id)}
-                        disabled={upgradingId === article.id}
-                        className="btn btn-outline btn-sm"
-                    >
-                        {upgradingId === article.id ? '...' : 'Upgrade'}
-                    </button>
-                )}
-                <Link href={`/admin/articles/${article.id}`} className="btn btn-ghost btn-sm">
-                    Edit
+                <button
+                    onClick={() => handleUpgrade(article.id)}
+                    disabled={upgradingId === article.id || upgradedIds.has(article.id)}
+                    className="action-btn"
+                    title="Upgrade with AI"
+                >
+                    {upgradingId === article.id ? '•••' : upgradedIds.has(article.id) ? '✓' : '↑'}
+                </button>
+                <Link href={`/admin/articles/${article.id}`} className="action-btn" title="Edit">
+                    ✏️
                 </Link>
             </div>
         </div>
@@ -149,11 +143,10 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
                     <h2 className="section-title">Published</h2>
                     <div className="articles-table">
                         <div className="table-header">
-                            <span className="col-title">Title</span>
-                            <span className="col-date">Published</span>
-                            <span className="col-order">Order</span>
-                            <span className="col-featured">Featured</span>
-                            <span className="col-actions">Actions</span>
+                            <span>Title</span>
+                            <span>Date</span>
+                            <span>#</span>
+                            <span>Actions</span>
                         </div>
                         {visibleArticles.map((article) => (
                             <ArticleRow key={article.id} article={article} isHidden={false} />
@@ -168,11 +161,10 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
                     <h2 className="section-title section-title-hidden">Hidden</h2>
                     <div className="articles-table articles-table-hidden">
                         <div className="table-header">
-                            <span className="col-title">Title</span>
-                            <span className="col-date">Published</span>
-                            <span className="col-order">Order</span>
-                            <span className="col-featured">Featured</span>
-                            <span className="col-actions">Actions</span>
+                            <span>Title</span>
+                            <span>Date</span>
+                            <span>#</span>
+                            <span>Actions</span>
                         </div>
                         {hiddenArticles.map((article) => (
                             <ArticleRow key={article.id} article={article} isHidden={true} />
@@ -246,22 +238,22 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
         
         .table-header {
           display: grid;
-          grid-template-columns: 1fr 100px 60px 70px 180px;
-          gap: var(--space-4);
-          padding: var(--space-3) var(--space-4);
+          grid-template-columns: 1fr 70px 40px 90px;
+          gap: var(--space-3);
+          padding: var(--space-2) var(--space-4);
           background-color: var(--color-bg-alt);
-          font-size: var(--text-xs);
-          font-weight: 500;
+          font-size: 11px;
+          font-weight: 600;
           text-transform: uppercase;
-          letter-spacing: var(--tracking-wider);
+          letter-spacing: 0.05em;
           color: var(--color-text-muted);
         }
         
         .table-row {
           display: grid;
-          grid-template-columns: 1fr 100px 60px 70px 180px;
-          gap: var(--space-4);
-          padding: var(--space-4);
+          grid-template-columns: 1fr 70px 40px 90px;
+          gap: var(--space-3);
+          padding: var(--space-3) var(--space-4);
           border-top: 1px solid var(--color-border-subtle);
           align-items: center;
         }
@@ -270,27 +262,47 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
           background-color: #fef2f2;
         }
         
+        .col-title {
+          min-width: 0;
+        }
+        
+        .title-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        
         .article-title-link {
           font-weight: 500;
+          font-size: 14px;
           color: var(--color-text);
           text-decoration: none;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         
         .article-title-link:hover {
           color: var(--color-accent);
         }
         
-        .col-title .context-label {
-          display: block;
-          margin-top: var(--space-1);
+        .context-label {
+          font-size: 11px;
+          color: var(--color-text-muted);
+          text-transform: uppercase;
+        }
+        
+        .col-date {
+          font-size: 12px;
+          color: var(--color-text-muted);
         }
         
         .order-input {
-          width: 50px;
-          padding: 4px 6px;
+          width: 36px;
+          padding: 4px;
           border: 1px solid var(--color-border-subtle);
           border-radius: 4px;
-          font-size: var(--text-sm);
+          font-size: 12px;
           text-align: center;
         }
         
@@ -300,31 +312,48 @@ export default function AdminArticlesContent({ articles, publishedArticles, sche
         }
         
         .featured-badge {
-          color: var(--color-accent);
-        }
-        
-        .btn-sm {
-          padding: var(--space-1) var(--space-3);
-          font-size: var(--text-sm);
+          color: #d4a000;
+          font-size: 14px;
         }
         
         .col-actions {
           display: flex;
-          gap: var(--space-2);
+          gap: 4px;
         }
         
-        .btn-success {
-          border-color: var(--color-success);
-          color: var(--color-success);
+        .action-btn {
+          width: 28px;
+          height: 28px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--color-border-subtle);
+          border-radius: 4px;
+          background: white;
+          cursor: pointer;
+          font-size: 14px;
+          text-decoration: none;
+          color: inherit;
         }
         
-        .btn-danger-outline {
+        .action-btn:hover {
+          background: var(--color-bg-alt);
+          border-color: var(--color-text-muted);
+        }
+        
+        .action-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        .action-hide:hover {
+          background: #fef2f2;
           border-color: #dc2626;
-          color: #dc2626;
         }
         
-        .btn-danger-outline:hover {
-          background-color: #fef2f2;
+        .action-show:hover {
+          background: #f0fdf4;
+          border-color: #16a34a;
         }
         
         .empty-state {
