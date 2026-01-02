@@ -84,6 +84,14 @@ model Article {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   
+  // SEO fields
+  metaDescription   String?
+  canonicalUrl      String?
+  noindex           Boolean   @default(false)
+  seoLastReviewedAt DateTime?
+  seoStatus         String?   // OK, NEEDS_ATTENTION
+  seoNotes          String?   // Steward suggestions
+  
   // Related articles (many-to-many self-relation)
   relatedTo     ArticleRelation[] @relation("ArticleFrom")
   relatedFrom   ArticleRelation[] @relation("ArticleTo")
